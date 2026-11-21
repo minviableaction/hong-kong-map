@@ -44,6 +44,7 @@ type MapViewProps = {
   selectedCamera: string | null
   focusToken: number
   fitToken: number
+  threeD: boolean
   runs: TrainRun[]
   onSelectStation: (code: string) => void
   onSelectCamera: (key: string) => void
@@ -57,6 +58,7 @@ export function MapView({
   selectedCamera,
   focusToken,
   fitToken,
+  threeD,
   runs,
   onSelectStation,
   onSelectCamera,
@@ -68,6 +70,7 @@ export function MapView({
   const visibilityRef = useRef({ showNetwork, showCameras })
   const handlersRef = useRef({ onSelectStation, onSelectCamera })
   const runsRef = useRef(runs)
+  const threeDRef = useRef(threeD)
   const [canDraw] = useState(browserCanDrawMap)
   const [failed, setFailed] = useState(false)
 
@@ -77,6 +80,7 @@ export function MapView({
     visibilityRef.current = { showNetwork, showCameras }
     handlersRef.current = { onSelectStation, onSelectCamera }
     runsRef.current = runs
+    threeDRef.current = threeD
   })
 
   useEffect(() => {
@@ -96,6 +100,7 @@ export function MapView({
         ],
         failIfMajorPerformanceCaveat: false,
         attributionControl: { compact: false },
+        maxPitch: 75,
       })
     } catch (error) {
       console.error(error)
@@ -362,17 +367,63 @@ export function MapView({
         ? ([camera.lon, camera.lat] as [number, number])
         : null
     if (!map || !center) return
+    const pitched = threeDRef.current
     map.flyTo({
       center,
-      zoom: Math.max(map.getZoom(), station ? 14 : 15),
+      zoom: Math.max(map.getZoom(), pitched ? 16 : station ? 14 : 15),
+      pitch: pitched ? 67 : map.getPitch(),
       duration: 700,
     })
   }, [focusToken, selectedStation, selectedCamera, cameras])
 
   useEffect(() => {
     if (fitToken === 0) return
-    mapRef.current?.fitBounds(stationBounds(), { padding: 56, duration: 700 })
+    const map = mapRef.current
+    if (!map) return
+    const pitched = threeDRef.current
+    map.fitBounds(stationBounds(), {
+      padding: 56,
+      duration: 700,
+      pitch: pitched ? 60 : 0,
+      bearing: pitched ? -28 : 0,
+    })
   }, [fitToken])
+
+  const skipInitialView = useRef(true)
+  useEffect(() => {
+    if (skipInitialView.current) {
+      skipInitialView.current = false
+      return
+    }
+    const map = mapRef.current
+    if (!map) return
+    const apply = () => {
+      if (threeD) {
+        const zoomedOut = map.getZoom() < 14.5
+        map.setMaxBounds(null)
+        map.easeTo({
+          pitch: 67,
+          bearing: -28,
+          zoom: Math.max(map.getZoom(), 16),
+          center: zoomedOut ? [114.158, 22.281] : map.getCenter(),
+          duration: 1100,
+        })
+        return
+      }
+      map.easeTo({ pitch: 0, bearing: 0, duration: 700 })
+      map.once('moveend', () => {
+        map.setMaxBounds([
+          [113.55, 22.05],
+          [114.62, 22.68],
+        ])
+      })
+    }
+    try {
+      apply()
+    } catch {
+      map.once('load', apply)
+    }
+  }, [threeD])
 
   return (
     <>

@@ -8,7 +8,7 @@ import { lineByCode, lineInk, lines, searchStations, stationByCode } from '@/lib
 import { viewFromSnapshot } from '@/lib/schedule'
 import type { TrainSnapshot } from '@/lib/snapshot'
 import { fetchTrainSnapshot, runsFromSnapshot } from '@/lib/trains'
-import { Camera as CameraIcon, Search, TrainFront } from 'lucide-react'
+import { Building2, Camera as CameraIcon, Search, TrainFront } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 function App() {
@@ -22,6 +22,7 @@ function App() {
   const [query, setQuery] = useState('')
   const [focusToken, setFocusToken] = useState(0)
   const [fitToken, setFitToken] = useState(0)
+  const [threeD, setThreeD] = useState(false)
   const [snapshot, setSnapshot] = useState<TrainSnapshot | null>(null)
   const [scheduleError, setScheduleError] = useState<string | null>(null)
 
@@ -129,6 +130,7 @@ function App() {
         selectedCamera={cameraKey}
         focusToken={focusToken}
         fitToken={fitToken}
+        threeD={threeD}
         runs={runs}
         onSelectStation={chooseStation}
         onSelectCamera={chooseCamera}
@@ -184,7 +186,7 @@ function App() {
                 </ul>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant={showNetwork ? 'default' : 'outline'}
                 aria-pressed={showNetwork}
@@ -203,6 +205,14 @@ function App() {
               </Button>
               <Button variant="outline" onClick={() => setFitToken((value) => value + 1)}>
                 全港
+              </Button>
+              <Button
+                variant={threeD ? 'default' : 'outline'}
+                aria-pressed={threeD}
+                onClick={() => setThreeD((value) => !value)}
+              >
+                <Building2 />
+                {threeD ? '俯視' : '立體'}
               </Button>
             </div>
           </div>
