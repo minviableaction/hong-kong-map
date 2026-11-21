@@ -1,6 +1,5 @@
-import { lineByCode, stationByCode, type Station } from '@/lib/network'
-
-const ENDPOINT = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php'
+import { stationByCode, type Station } from '@/lib/network'
+import type { TrainSnapshot } from '@/lib/snapshot'
 
 type RawTrain = {
   dest?: string
@@ -100,6 +99,31 @@ function emptyDirectionNote(station: Station, line: string) {
   return '這個方向現時沒有班次。'
 }
 
+export function viewFromSnapshot(station: Station, line: string, snapshot: TrainSnapshot): ScheduleView {
+  const key = `${line}-${station.code}`
+  const cached = snapshot.stations[key]
+  if (!cached) {
+    return {
+      delay: false,
+      updatedAt: null,
+      stationNote: '共用班次暫時沒有這站。請稍後再看。',
+      directions: [],
+    }
+  }
+  return interpretSchedule(station, line, {
+    status: 1,
+    isdelay: cached.delay ? 'Y' : 'N',
+    curr_time: cached.currTime ?? undefined,
+    data: {
+      [key]: {
+        curr_time: cached.currTime ?? undefined,
+        UP: cached.up,
+        DOWN: cached.down,
+      },
+    },
+  })
+}
+
 export function interpretSchedule(station: Station, line: string, payload: RawPayload): ScheduleView {
   if (payload.status !== 1) {
     throw new ScheduleRequestError('港鐵暫時沒有這站的班次資料。')
@@ -130,44 +154,4 @@ export function interpretSchedule(station: Station, line: string, payload: RawPa
       { label: directionLabel(down), trains: down, emptyNote: down.length ? null : emptyNote },
     ],
   }
-}
-
-const REQUEST_TIMEOUT_MS = 12000
-
-export async function fetchSchedule(station: Station, line: string, signal: AbortSignal) {
-  if (!lineByCode[line] || !station.lines.includes(line)) {
-    throw new ScheduleRequestError('這站沒有這條綫的班次。')
-  }
-
-  const timeout = new AbortController()
-  const timer = setTimeout(() => timeout.abort(), REQUEST_TIMEOUT_MS)
-  const onAbort = () => timeout.abort()
-  if (signal.aborted) timeout.abort()
-  else signal.addEventListener('abort', onAbort)
-
-  let response: Response
-  try {
-    const url = new URL(ENDPOINT)
-    url.searchParams.set('line', line)
-    url.searchParams.set('sta', station.code)
-    url.searchParams.set('lang', 'TC')
-    response = await fetch(url, { signal: timeout.signal })
-  } catch (error) {
-    if (signal.aborted) throw error
-    if (timeout.signal.aborted) throw new ScheduleRequestError('查詢逾時，請稍後再試。')
-    throw new ScheduleRequestError('暫時無法連到港鐵到站資料，請稍後再試。')
-  } finally {
-    clearTimeout(timer)
-    signal.removeEventListener('abort', onAbort)
-  }
-
-  if (response.status === 429) {
-    throw new ScheduleRequestError('查詢太密，請稍後再試。')
-  }
-  if (!response.ok) {
-    throw new ScheduleRequestError('暫時無法連到港鐵到站資料，請稍後再試。')
-  }
-
-  const payload = (await response.json()) as RawPayload
-  return interpretSchedule(station, line, payload)
 }

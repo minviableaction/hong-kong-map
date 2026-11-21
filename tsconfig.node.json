@@ -19,5 +19,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "src/server/**/*.ts", "src/lib/routes.ts", "src/lib/snapshot.ts", "src/lib/cameras.ts", "api/**/*.ts", "worker/**/*.ts"]
 }

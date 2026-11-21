@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { fetchCameras, type Camera } from '@/lib/cameras'
 import { lineByCode, lineInk, lines, searchStations, stationByCode } from '@/lib/network'
-import { fetchTrainRuns, type TrainRun } from '@/lib/trains'
+import { viewFromSnapshot } from '@/lib/schedule'
+import type { TrainSnapshot } from '@/lib/snapshot'
+import { fetchTrainSnapshot, runsFromSnapshot } from '@/lib/trains'
 import { Camera as CameraIcon, Search, TrainFront } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -20,7 +22,8 @@ function App() {
   const [query, setQuery] = useState('')
   const [focusToken, setFocusToken] = useState(0)
   const [fitToken, setFitToken] = useState(0)
-  const [runs, setRuns] = useState<TrainRun[]>([])
+  const [snapshot, setSnapshot] = useState<TrainSnapshot | null>(null)
+  const [scheduleError, setScheduleError] = useState<string | null>(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -42,23 +45,56 @@ function App() {
     let timer = 0
     let stopped = false
 
+    let running = false
+
     async function load() {
       try {
-        const next = await fetchTrainRuns(controller.signal)
-        if (!stopped) setRuns(next)
+        const next = await fetchTrainSnapshot(controller.signal)
+        if (stopped) return
+        if (next) {
+          setSnapshot(next)
+          setScheduleError(null)
+        } else {
+          setScheduleError('暫時未能讀取共用班次。')
+        }
       } catch {
-        if (!stopped) setRuns([])
+        if (!stopped) setScheduleError('暫時未能讀取共用班次。')
       }
-      if (!stopped) timer = window.setTimeout(() => void load(), 30000)
     }
 
-    void load()
+    async function tick() {
+      if (stopped || document.hidden || running) return
+      running = true
+      try {
+        await load()
+      } finally {
+        running = false
+      }
+      if (stopped || document.hidden) return
+      timer = window.setTimeout(() => void tick(), 45_000)
+    }
+
+    void tick()
+    const onVisibility = () => {
+      window.clearTimeout(timer)
+      if (!document.hidden) void tick()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
     return () => {
       stopped = true
       controller.abort()
       window.clearTimeout(timer)
+      document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [showNetwork])
+
+  const runs = useMemo(() => (snapshot ? runsFromSnapshot(snapshot) : []), [snapshot])
+  const scheduleView = useMemo(() => {
+    if (!snapshot || !stationCode || !lineCode) return null
+    const selected = stationByCode[stationCode]
+    if (!selected) return null
+    return viewFromSnapshot(selected, lineCode, snapshot)
+  }, [snapshot, stationCode, lineCode])
 
   const station = stationCode ? stationByCode[stationCode] : undefined
   const camera = cameras.find((item) => item.key === cameraKey)
@@ -212,6 +248,9 @@ function App() {
             <StationPanel
               station={station}
               line={lineCode}
+              view={scheduleView}
+              loading={snapshot === null && !scheduleError}
+              error={scheduleError}
               onLineChange={setLineCode}
               onClose={() => {
                 setStationCode(null)

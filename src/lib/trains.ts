@@ -1,31 +1,7 @@
 import { lineByCode, segments, stationByCode } from '@/lib/network'
 import { parseHongKongTime } from '@/lib/schedule'
-
-const ENDPOINT = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php'
-
-const ROUTES: Record<string, string[][]> = {
-  AEL: [['HOK', 'KOW', 'TSY', 'AIR', 'AWE']],
-  TCL: [['HOK', 'KOW', 'OLY', 'NAC', 'LAK', 'TSY', 'SUN', 'TUC']],
-  TML: [[
-    'WKS', 'MOS', 'HEO', 'TSH', 'SHM', 'CIO', 'STW', 'CKT', 'TAW', 'HIK', 'DIH', 'KAT', 'SUW', 'TKW',
-    'HOM', 'HUH', 'ETS', 'AUS', 'NAC', 'MEF', 'TWW', 'KSR', 'YUL', 'LOP', 'TIS', 'SIH', 'TUM',
-  ]],
-  TKL: [
-    ['NOP', 'QUB', 'YAT', 'TIK', 'TKO', 'HAH', 'POA'],
-    ['NOP', 'QUB', 'YAT', 'TIK', 'TKO', 'LHP'],
-  ],
-  EAL: [
-    ['ADM', 'EXC', 'HUH', 'MKK', 'KOT', 'TAW', 'SHT', 'FOT', 'UNI', 'TAP', 'TWO', 'FAN', 'SHS', 'LOW'],
-    ['ADM', 'EXC', 'HUH', 'MKK', 'KOT', 'TAW', 'SHT', 'FOT', 'UNI', 'TAP', 'TWO', 'FAN', 'SHS', 'LMC'],
-    ['ADM', 'EXC', 'HUH', 'MKK', 'KOT', 'TAW', 'SHT', 'RAC', 'UNI', 'TAP', 'TWO', 'FAN', 'SHS', 'LOW'],
-    ['ADM', 'EXC', 'HUH', 'MKK', 'KOT', 'TAW', 'SHT', 'RAC', 'UNI', 'TAP', 'TWO', 'FAN', 'SHS', 'LMC'],
-  ],
-  SIL: [['ADM', 'OCP', 'WCH', 'LET', 'SOH']],
-  TWL: [['CEN', 'ADM', 'TST', 'JOR', 'YMT', 'MOK', 'PRE', 'SSP', 'CSW', 'LCK', 'MEF', 'LAK', 'KWF', 'KWH', 'TWH', 'TSW']],
-  ISL: [['KET', 'HKU', 'SYP', 'SHW', 'CEN', 'ADM', 'WAC', 'CAB', 'TIH', 'FOH', 'NOP', 'QUB', 'TAK', 'SWH', 'SKW', 'HFC', 'CHW']],
-  KTL: [['WHA', 'HOM', 'YMT', 'MOK', 'PRE', 'SKM', 'KOT', 'LOF', 'WTS', 'DIH', 'CHH', 'KOB', 'NTK', 'KWT', 'LAT', 'YAT', 'TIK']],
-  DRL: [['DIS', 'SUN']],
-}
+import { ROUTES } from '@/lib/routes'
+import type { TrainSnapshot } from '@/lib/snapshot'
 
 const SPEED_KMH: Record<string, number> = {
   AEL: 105,
@@ -84,26 +60,10 @@ function cumulativeOf(path: [number, number][]) {
   return cumulative
 }
 
-function runMs(line: string, path: [number, number][]) {
+function segmentRunMs(line: string, path: [number, number][]) {
   const distance = cumulativeOf(path).at(-1) ?? 0
   const speed = (SPEED_KMH[line] ?? 42) / 3.6
   return Math.min(14 * 60 * 1000, Math.max(50 * 1000, (distance / speed) * 1000))
-}
-
-function jobs() {
-  const pairs: { line: string; station: string }[] = []
-  const seen = new Set<string>()
-  for (const [line, routes] of Object.entries(ROUTES)) {
-    for (const route of routes) {
-      for (const station of route) {
-        const key = `${line}:${station}`
-        if (seen.has(key)) continue
-        seen.add(key)
-        pairs.push({ line, station })
-      }
-    }
-  }
-  return pairs
 }
 
 function placements(sighting: Sighting): Placement[] {
@@ -168,71 +128,7 @@ function choosePlacement(sighting: Sighting, sightings: Sighting[]) {
   return best
 }
 
-async function fetchOne(line: string, station: string, signal: AbortSignal): Promise<Sighting[]> {
-  const url = new URL(ENDPOINT)
-  url.searchParams.set('line', line)
-  url.searchParams.set('sta', station)
-  url.searchParams.set('lang', 'TC')
-  let response: Response | null = null
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    if (signal.aborted) return []
-    const timeout = new AbortController()
-    const timer = setTimeout(() => timeout.abort(), 8000)
-    const onAbort = () => timeout.abort()
-    signal.addEventListener('abort', onAbort)
-    try {
-      response = await fetch(url, { signal: timeout.signal })
-    } catch {
-      response = null
-    } finally {
-      clearTimeout(timer)
-      signal.removeEventListener('abort', onAbort)
-    }
-    if (response?.status === 429 && attempt === 0) {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      continue
-    }
-    break
-  }
-  if (!response?.ok) return []
-  const payload = (await response.json()) as {
-    data?: Record<string, { UP?: RawTrain[]; DOWN?: RawTrain[] }>
-  }
-  const bucket = payload.data?.[`${line}-${station}`]
-  const trains = [...(bucket?.UP ?? []), ...(bucket?.DOWN ?? [])]
-  const sightings: Sighting[] = []
-  for (const train of trains) {
-    if (train.valid === 'N' || !train.dest) continue
-    const eta = parseHongKongTime(train.time)
-    if (eta === null) continue
-    sightings.push({
-      line,
-      station,
-      dest: train.dest,
-      eta,
-      viaRacecourse: train.route === 'RAC',
-    })
-  }
-  return sightings
-}
-
-type RawTrain = { dest?: string; time?: string; valid?: string; route?: string }
-
-export async function fetchTrainRuns(signal: AbortSignal) {
-  const queue = jobs()
-  const sightings: Sighting[] = []
-  let cursor = 0
-  async function worker() {
-    while (cursor < queue.length) {
-      if (signal.aborted) return
-      const job = queue[cursor]
-      cursor += 1
-      const rows = await fetchOne(job.line, job.station, signal)
-      sightings.push(...rows)
-    }
-  }
-  await Promise.all([worker(), worker(), worker(), worker()])
-
+function runsFromSightings(sightings: Sighting[]) {
   const runs: TrainRun[] = []
   const waiting = new Map<string, TrainRun>()
   for (const sighting of sightings) {
@@ -250,7 +146,7 @@ export async function fetchTrainRuns(signal: AbortSignal) {
       path,
       cumulative: cumulativeOf(path),
       eta: sighting.eta,
-      runMs: runMs(sighting.line, path),
+      runMs: segmentRunMs(sighting.line, path),
       kind: placement.kind,
     }
     if (run.kind !== 'approach') {
@@ -263,6 +159,34 @@ export async function fetchTrainRuns(signal: AbortSignal) {
   }
   runs.push(...waiting.values())
   return runs
+}
+
+export function runsFromSnapshot(snapshot: TrainSnapshot) {
+  const sightings: Sighting[] = []
+  for (const [key, station] of Object.entries(snapshot.stations)) {
+    const split = key.indexOf('-')
+    if (split < 1) continue
+    const line = key.slice(0, split)
+    const code = key.slice(split + 1)
+    for (const train of [...station.up, ...station.down]) {
+      const eta = parseHongKongTime(train.time)
+      if (eta === null) continue
+      sightings.push({
+        line,
+        station: code,
+        dest: train.dest,
+        eta,
+        viaRacecourse: train.route === 'RAC',
+      })
+    }
+  }
+  return runsFromSightings(sightings)
+}
+
+export async function fetchTrainSnapshot(signal: AbortSignal) {
+  const response = await fetch('/api/trains', { signal })
+  if (!response.ok) return null
+  return (await response.json()) as TrainSnapshot
 }
 
 export function trainCoordinate(run: TrainRun, now: number): [number, number] | null {
@@ -291,10 +215,10 @@ function pointAlong(run: TrainRun, fraction: number): [number, number] {
       const start = run.path[index - 1]
       const end = run.path[index]
       const point: [number, number] = [
-      start[0] + (end[0] - start[0]) * ratio,
-      start[1] + (end[1] - start[1]) * ratio,
-    ]
-    return point
+        start[0] + (end[0] - start[0]) * ratio,
+        start[1] + (end[1] - start[1]) * ratio,
+      ]
+      return point
     }
     target -= step
   }

@@ -304,10 +304,14 @@ export function MapView({
     })
 
     let frame = 0
-      const moveTrains = () => {
-        const source = map.getSource('trains')
-        if (source && 'setData' in source) {
-          ;(source as GeoJSONSource).setData(trainFeatures(runsRef.current, Date.now()))
+      let lastDrawn = 0
+      const moveTrains = (time: number) => {
+        if (!document.hidden && time - lastDrawn >= 100) {
+          lastDrawn = time
+          const source = map.getSource('trains')
+          if (source && 'setData' in source) {
+            ;(source as GeoJSONSource).setData(trainFeatures(runsRef.current, Date.now()))
+          }
         }
         frame = window.requestAnimationFrame(moveTrains)
       }

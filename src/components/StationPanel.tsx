@@ -2,74 +2,28 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { lineByCode, lineInk, type Station } from '@/lib/network'
-import {
-  fetchSchedule,
-  ScheduleRequestError,
-  type ScheduleView,
-} from '@/lib/schedule'
+import type { ScheduleView } from '@/lib/schedule'
 import { X } from 'lucide-react'
-import { useEffect, useState } from 'react'
 
 type StationPanelProps = {
   station: Station
   line: string
+  view: ScheduleView | null
+  loading: boolean
+  error: string | null
   onLineChange: (line: string) => void
   onClose: () => void
 }
 
-export function StationPanel({ station, line, onLineChange, onClose }: StationPanelProps) {
-  const [view, setView] = useState<ScheduleView | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const stopped = new AbortController()
-    let timer = 0
-    let activeRequest: AbortController | null = null
-
-    async function load(initial: boolean) {
-      activeRequest?.abort()
-      const request = new AbortController()
-      activeRequest = request
-      const stopThisRequest = () => request.abort()
-      stopped.signal.addEventListener('abort', stopThisRequest)
-      if (initial) {
-        setLoading(true)
-        setError(null)
-        setView(null)
-      }
-      try {
-        const next = await fetchSchedule(station, line, request.signal)
-        if (request.signal.aborted) return
-        setView(next)
-        setError(null)
-      } catch (caught) {
-        if (request.signal.aborted) return
-        const message =
-          caught instanceof ScheduleRequestError
-            ? caught.message
-            : '暫時無法連到港鐵到站資料，請稍後再試。'
-        setError(message)
-        if (initial) setView(null)
-      } finally {
-        stopped.signal.removeEventListener('abort', stopThisRequest)
-        if (!request.signal.aborted && initial) setLoading(false)
-        if (!stopped.signal.aborted && activeRequest === request) {
-          timer = window.setTimeout(() => {
-            void load(false)
-          }, 15000)
-        }
-      }
-    }
-
-    void load(true)
-
-    return () => {
-      stopped.abort()
-      activeRequest?.abort()
-      window.clearTimeout(timer)
-    }
-  }, [station, line])
+export function StationPanel({
+  station,
+  line,
+  view,
+  loading,
+  error,
+  onLineChange,
+  onClose,
+}: StationPanelProps) {
 
   const lineInfo = lineByCode[line]
 
@@ -160,7 +114,7 @@ export function StationPanel({ station, line, onLineChange, onClose }: StationPa
                 </div>
               ))}
               <p className="text-xs leading-5 text-muted-foreground">
-                班次來自港鐵實時列車服務，開着這個欄時約每 15 秒更新目前這條綫。終點站代碼已改寫成中文站名。
+                班次來自共用的港鐵到站快取，大約每分鐘更新一次，所有人讀同一份。終點站代碼已改寫成中文站名。
               </p>
             </>
           )}
