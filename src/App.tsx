@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { fetchCameras, type Camera } from '@/lib/cameras'
 import { lineByCode, lineInk, lines, searchStations, stationByCode } from '@/lib/network'
+import { fetchTrainRuns, type TrainRun } from '@/lib/trains'
 import { Camera as CameraIcon, Search, TrainFront } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -19,6 +20,7 @@ function App() {
   const [query, setQuery] = useState('')
   const [focusToken, setFocusToken] = useState(0)
   const [fitToken, setFitToken] = useState(0)
+  const [runs, setRuns] = useState<TrainRun[]>([])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -33,6 +35,30 @@ function App() {
       })
     return () => controller.abort()
   }, [])
+
+  useEffect(() => {
+    if (!showNetwork) return
+    const controller = new AbortController()
+    let timer = 0
+    let stopped = false
+
+    async function load() {
+      try {
+        const next = await fetchTrainRuns(controller.signal)
+        if (!stopped) setRuns(next)
+      } catch {
+        if (!stopped) setRuns([])
+      }
+      if (!stopped) timer = window.setTimeout(() => void load(), 30000)
+    }
+
+    void load()
+    return () => {
+      stopped = true
+      controller.abort()
+      window.clearTimeout(timer)
+    }
+  }, [showNetwork])
 
   const station = stationCode ? stationByCode[stationCode] : undefined
   const camera = cameras.find((item) => item.key === cameraKey)
@@ -67,6 +93,7 @@ function App() {
         selectedCamera={cameraKey}
         focusToken={focusToken}
         fitToken={fitToken}
+        runs={runs}
         onSelectStation={chooseStation}
         onSelectCamera={chooseCamera}
       />
@@ -157,7 +184,7 @@ function App() {
           ))}
         </ul>
         <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
-          橙色標記是交通快拍，縮小時會合併。路綫沿軌道形狀繪製，並列路軌會併成一條線。
+          橙色標記是交通快拍，縮小時會合併。路綫沿軌道形狀繪製。圓點是按到站時間估算的列車位置，不是衛星定位。
         </p>
       </div>
 

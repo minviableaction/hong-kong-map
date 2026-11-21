@@ -55,7 +55,7 @@ function destinationName(code: string | undefined) {
 
 const HONG_KONG_OFFSET_MS = 8 * 60 * 60 * 1000
 
-function parseHongKongTime(value: string | undefined) {
+export function parseHongKongTime(value: string | undefined) {
   if (!value) return null
   const match = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/.exec(value)
   if (!match) return null

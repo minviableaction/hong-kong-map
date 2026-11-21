@@ -1,0 +1,321 @@
+import { lineByCode, segments, stationByCode } from '@/lib/network'
+import { parseHongKongTime } from '@/lib/schedule'
+
+const ENDPOINT = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php'
+
+const ROUTES: Record<string, string[][]> = {
+  AEL: [['HOK', 'KOW', 'TSY', 'AIR', 'AWE']],
+  TCL: [['HOK', 'KOW', 'OLY', 'NAC', 'LAK', 'TSY', 'SUN', 'TUC']],
+  TML: [[
+    'WKS', 'MOS', 'HEO', 'TSH', 'SHM', 'CIO', 'STW', 'CKT', 'TAW', 'HIK', 'DIH', 'KAT', 'SUW', 'TKW',
+    'HOM', 'HUH', 'ETS', 'AUS', 'NAC', 'MEF', 'TWW', 'KSR', 'YUL', 'LOP', 'TIS', 'SIH', 'TUM',
+  ]],
+  TKL: [
+    ['NOP', 'QUB', 'YAT', 'TIK', 'TKO', 'HAH', 'POA'],
+    ['NOP', 'QUB', 'YAT', 'TIK', 'TKO', 'LHP'],
+  ],
+  EAL: [
+    ['ADM', 'EXC', 'HUH', 'MKK', 'KOT', 'TAW', 'SHT', 'FOT', 'UNI', 'TAP', 'TWO', 'FAN', 'SHS', 'LOW'],
+    ['ADM', 'EXC', 'HUH', 'MKK', 'KOT', 'TAW', 'SHT', 'FOT', 'UNI', 'TAP', 'TWO', 'FAN', 'SHS', 'LMC'],
+    ['ADM', 'EXC', 'HUH', 'MKK', 'KOT', 'TAW', 'SHT', 'RAC', 'UNI', 'TAP', 'TWO', 'FAN', 'SHS', 'LOW'],
+    ['ADM', 'EXC', 'HUH', 'MKK', 'KOT', 'TAW', 'SHT', 'RAC', 'UNI', 'TAP', 'TWO', 'FAN', 'SHS', 'LMC'],
+  ],
+  SIL: [['ADM', 'OCP', 'WCH', 'LET', 'SOH']],
+  TWL: [['CEN', 'ADM', 'TST', 'JOR', 'YMT', 'MOK', 'PRE', 'SSP', 'CSW', 'LCK', 'MEF', 'LAK', 'KWF', 'KWH', 'TWH', 'TSW']],
+  ISL: [['KET', 'HKU', 'SYP', 'SHW', 'CEN', 'ADM', 'WAC', 'CAB', 'TIH', 'FOH', 'NOP', 'QUB', 'TAK', 'SWH', 'SKW', 'HFC', 'CHW']],
+  KTL: [['WHA', 'HOM', 'YMT', 'MOK', 'PRE', 'SKM', 'KOT', 'LOF', 'WTS', 'DIH', 'CHH', 'KOB', 'NTK', 'KWT', 'LAT', 'YAT', 'TIK']],
+  DRL: [['DIS', 'SUN']],
+}
+
+const SPEED_KMH: Record<string, number> = {
+  AEL: 105,
+  TCL: 62,
+  EAL: 58,
+  TML: 52,
+  DRL: 50,
+}
+
+type Sighting = {
+  line: string
+  station: string
+  dest: string
+  eta: number
+  viaRacecourse: boolean
+}
+
+type Placement = {
+  from: string
+  to: string
+  kind: 'approach' | 'wait' | 'depart'
+}
+
+export type TrainRun = {
+  id: string
+  line: string
+  color: string
+  station: string
+  label: string
+  path: [number, number][]
+  cumulative: number[]
+  eta: number
+  runMs: number
+  kind: 'approach' | 'wait' | 'depart'
+}
+
+const segmentPaths = new Map<string, [number, number][]>()
+for (const segment of segments) {
+  const forward = segment.coordinates.map((point) => [point[0], point[1]] as [number, number])
+  segmentPaths.set(`${segment.line}:${segment.from}:${segment.to}`, forward)
+  segmentPaths.set(`${segment.line}:${segment.to}:${segment.from}`, [...forward].reverse())
+}
+
+function meters(a: [number, number], b: [number, number]) {
+  const lat = ((a[1] + b[1]) / 2) * Math.PI / 180
+  const dx = (a[0] - b[0]) * Math.cos(lat) * 111320
+  const dy = (a[1] - b[1]) * 110540
+  return Math.hypot(dx, dy)
+}
+
+function cumulativeOf(path: [number, number][]) {
+  const cumulative = [0]
+  for (let index = 1; index < path.length; index += 1) {
+    cumulative.push(cumulative[index - 1] + meters(path[index - 1], path[index]))
+  }
+  return cumulative
+}
+
+function runMs(line: string, path: [number, number][]) {
+  const distance = cumulativeOf(path).at(-1) ?? 0
+  const speed = (SPEED_KMH[line] ?? 42) / 3.6
+  return Math.min(14 * 60 * 1000, Math.max(50 * 1000, (distance / speed) * 1000))
+}
+
+function jobs() {
+  const pairs: { line: string; station: string }[] = []
+  const seen = new Set<string>()
+  for (const [line, routes] of Object.entries(ROUTES)) {
+    for (const route of routes) {
+      for (const station of route) {
+        const key = `${line}:${station}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        pairs.push({ line, station })
+      }
+    }
+  }
+  return pairs
+}
+
+function placements(sighting: Sighting): Placement[] {
+  let routes = ROUTES[sighting.line] ?? []
+  if (sighting.viaRacecourse) {
+    const raced = routes.filter((route) => route.includes('RAC'))
+    if (raced.some((route) => route.includes(sighting.station) && route.includes(sighting.dest))) {
+      routes = raced
+    }
+  }
+  const found: Placement[] = []
+  for (const route of routes) {
+    const at = route.indexOf(sighting.station)
+    const dest = route.indexOf(sighting.dest)
+    if (at < 0 || dest < 0) continue
+    if (at === dest) {
+      const fromHigher = at < route.length / 2
+      const previous = fromHigher ? route[at + 1] : route[at - 1]
+      if (previous) found.push({ from: previous, to: sighting.station, kind: 'approach' })
+      continue
+    }
+    const forward = dest > at
+    const previous = forward ? route[at - 1] : route[at + 1]
+    if (!previous) {
+      const next = forward ? route[at + 1] : route[at - 1]
+      if (next) {
+        found.push({
+          from: sighting.station,
+          to: next,
+          kind: next === sighting.dest ? 'depart' : 'wait',
+        })
+      }
+      continue
+    }
+    found.push({ from: previous, to: sighting.station, kind: 'approach' })
+  }
+  return found
+}
+
+function choosePlacement(sighting: Sighting, sightings: Sighting[]) {
+  const options = placements(sighting)
+  if (options.length === 0) return null
+  let best = options[0]
+  let bestScore = -1
+  for (const option of options) {
+    const matched = sightings.some((other) => {
+      return (
+        other.line === sighting.line &&
+        other.station === option.from &&
+        other.dest === sighting.dest &&
+        other.viaRacecourse === sighting.viaRacecourse &&
+        other.eta < sighting.eta &&
+        sighting.eta - other.eta < 8 * 60 * 1000
+      )
+    })
+    const score = matched ? 2 : option.kind === 'wait' ? 1 : 0
+    if (score > bestScore) {
+      best = option
+      bestScore = score
+    }
+  }
+  return best
+}
+
+async function fetchOne(line: string, station: string, signal: AbortSignal): Promise<Sighting[]> {
+  const url = new URL(ENDPOINT)
+  url.searchParams.set('line', line)
+  url.searchParams.set('sta', station)
+  url.searchParams.set('lang', 'TC')
+  let response: Response | null = null
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    if (signal.aborted) return []
+    const timeout = new AbortController()
+    const timer = setTimeout(() => timeout.abort(), 8000)
+    const onAbort = () => timeout.abort()
+    signal.addEventListener('abort', onAbort)
+    try {
+      response = await fetch(url, { signal: timeout.signal })
+    } catch {
+      response = null
+    } finally {
+      clearTimeout(timer)
+      signal.removeEventListener('abort', onAbort)
+    }
+    if (response?.status === 429 && attempt === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      continue
+    }
+    break
+  }
+  if (!response?.ok) return []
+  const payload = (await response.json()) as {
+    data?: Record<string, { UP?: RawTrain[]; DOWN?: RawTrain[] }>
+  }
+  const bucket = payload.data?.[`${line}-${station}`]
+  const trains = [...(bucket?.UP ?? []), ...(bucket?.DOWN ?? [])]
+  const sightings: Sighting[] = []
+  for (const train of trains) {
+    if (train.valid === 'N' || !train.dest) continue
+    const eta = parseHongKongTime(train.time)
+    if (eta === null) continue
+    sightings.push({
+      line,
+      station,
+      dest: train.dest,
+      eta,
+      viaRacecourse: train.route === 'RAC',
+    })
+  }
+  return sightings
+}
+
+type RawTrain = { dest?: string; time?: string; valid?: string; route?: string }
+
+export async function fetchTrainRuns(signal: AbortSignal) {
+  const queue = jobs()
+  const sightings: Sighting[] = []
+  let cursor = 0
+  async function worker() {
+    while (cursor < queue.length) {
+      if (signal.aborted) return
+      const job = queue[cursor]
+      cursor += 1
+      const rows = await fetchOne(job.line, job.station, signal)
+      sightings.push(...rows)
+    }
+  }
+  await Promise.all([worker(), worker(), worker(), worker()])
+
+  const runs: TrainRun[] = []
+  const waiting = new Map<string, TrainRun>()
+  for (const sighting of sightings) {
+    const placement = choosePlacement(sighting, sightings)
+    if (!placement) continue
+    const path = segmentPaths.get(`${sighting.line}:${placement.from}:${placement.to}`)
+    if (!path || path.length < 2) continue
+    const station = stationByCode[sighting.dest]
+    const run: TrainRun = {
+      id: `${sighting.line}-${sighting.station}-${sighting.dest}-${sighting.eta}`,
+      line: sighting.line,
+      color: lineByCode[sighting.line]?.color ?? '#334155',
+      station: sighting.station,
+      label: `往${station?.name ?? sighting.dest}`,
+      path,
+      cumulative: cumulativeOf(path),
+      eta: sighting.eta,
+      runMs: runMs(sighting.line, path),
+      kind: placement.kind,
+    }
+    if (run.kind !== 'approach') {
+      const key = `${run.line}:${run.station}`
+      const current = waiting.get(key)
+      if (!current || run.eta < current.eta) waiting.set(key, run)
+      continue
+    }
+    runs.push(run)
+  }
+  runs.push(...waiting.values())
+  return runs
+}
+
+export function trainCoordinate(run: TrainRun, now: number): [number, number] | null {
+  const remain = run.eta - now
+  if (run.kind === 'wait') {
+    if (remain < 0 || remain > 3 * 60 * 1000) return null
+    return run.path[0]
+  }
+  if (run.kind === 'depart') {
+    if (remain > 3 * 60 * 1000 || remain < -run.runMs) return null
+    if (remain > 0) return run.path[0]
+    return pointAlong(run, Math.min(1, -remain / run.runMs))
+  }
+  if (remain > run.runMs || remain < -20_000) return null
+  const fraction = Math.min(1, Math.max(0, 1 - remain / run.runMs))
+  return pointAlong(run, fraction)
+}
+
+function pointAlong(run: TrainRun, fraction: number): [number, number] {
+  const total = run.cumulative[run.cumulative.length - 1] ?? 0
+  let target = total * fraction
+  for (let index = 1; index < run.path.length; index += 1) {
+    const step = run.cumulative[index] - run.cumulative[index - 1]
+    if (target <= step || index === run.path.length - 1) {
+      const ratio = step === 0 ? 0 : Math.min(1, target / step)
+      const start = run.path[index - 1]
+      const end = run.path[index]
+      const point: [number, number] = [
+      start[0] + (end[0] - start[0]) * ratio,
+      start[1] + (end[1] - start[1]) * ratio,
+    ]
+    return point
+    }
+    target -= step
+  }
+  return run.path[run.path.length - 1] ?? run.path[0]
+}
+
+export function trainFeatures(runs: TrainRun[], now: number) {
+  return {
+    type: 'FeatureCollection' as const,
+    features: runs.flatMap((run) => {
+      const coordinate = trainCoordinate(run, now)
+      if (!coordinate) return []
+      return [{
+        type: 'Feature' as const,
+        properties: {
+          color: run.color,
+          station: run.station,
+          label: run.label,
+        },
+        geometry: { type: 'Point' as const, coordinates: coordinate },
+      }]
+    }),
+  }
+}
