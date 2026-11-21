@@ -12,6 +12,23 @@ import { useEffect, useRef, useState } from 'react'
 
 const STYLE = 'https://tiles.openfreemap.org/styles/liberty'
 
+function roundedRect(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+) {
+  context.beginPath()
+  context.moveTo(x + radius, y)
+  context.arcTo(x + width, y, x + width, y + height, radius)
+  context.arcTo(x + width, y + height, x, y + height, radius)
+  context.arcTo(x, y + height, x, y, radius)
+  context.arcTo(x, y, x + width, y, radius)
+  context.closePath()
+}
+
 function trainMarker(color: string) {
   const size = 64
   const canvas = document.createElement('canvas')
@@ -19,16 +36,20 @@ function trainMarker(color: string) {
   canvas.height = size
   const context = canvas.getContext('2d')
   if (!context) return null
-  context.beginPath()
-  context.arc(32, 32, 22, 0, Math.PI * 2)
+  context.clearRect(0, 0, size, size)
+  roundedRect(context, 4, 12, 56, 34, 12)
   context.fillStyle = '#ffffff'
   context.fill()
-  context.lineWidth = 8
-  context.strokeStyle = color
-  context.stroke()
-  context.beginPath()
-  context.arc(32, 32, 8, 0, Math.PI * 2)
+  roundedRect(context, 8, 16, 48, 26, 9)
   context.fillStyle = color
+  context.fill()
+  context.fillStyle = '#ffffff'
+  context.fillRect(16, 22, 12, 9)
+  context.fillRect(36, 22, 12, 9)
+  context.beginPath()
+  context.arc(20, 46, 5, 0, Math.PI * 2)
+  context.arc(44, 46, 5, 0, Math.PI * 2)
+  context.fillStyle = '#1c1917'
   context.fill()
   return context.getImageData(0, 0, size, size)
 }
@@ -266,7 +287,7 @@ export function MapView({
         source: 'trains',
         layout: {
           'icon-image': ['concat', 'train-', ['slice', ['get', 'color'], 1]],
-          'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 0.42, 13, 0.58, 16, 0.82],
+          'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 0.7, 13, 0.95, 16, 1.25],
           'icon-allow-overlap': true,
           'icon-ignore-placement': true,
           'icon-pitch-alignment': 'viewport',
