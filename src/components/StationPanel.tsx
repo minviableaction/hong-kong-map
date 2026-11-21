@@ -23,23 +23,28 @@ export function StationPanel({ station, line, onLineChange, onClose }: StationPa
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const controller = new AbortController()
+    const stopped = new AbortController()
     let timer = 0
-    let generation = 0
+    let activeRequest: AbortController | null = null
 
     async function load(initial: boolean) {
-      const requestId = ++generation
+      activeRequest?.abort()
+      const request = new AbortController()
+      activeRequest = request
+      const stopThisRequest = () => request.abort()
+      stopped.signal.addEventListener('abort', stopThisRequest)
       if (initial) {
         setLoading(true)
         setError(null)
+        setView(null)
       }
       try {
-        const next = await fetchSchedule(station, line, controller.signal)
-        if (controller.signal.aborted || requestId !== generation) return
+        const next = await fetchSchedule(station, line, request.signal)
+        if (request.signal.aborted) return
         setView(next)
         setError(null)
       } catch (caught) {
-        if (controller.signal.aborted || requestId !== generation) return
+        if (request.signal.aborted) return
         const message =
           caught instanceof ScheduleRequestError
             ? caught.message
@@ -47,18 +52,22 @@ export function StationPanel({ station, line, onLineChange, onClose }: StationPa
         setError(message)
         if (initial) setView(null)
       } finally {
-        if (!controller.signal.aborted && requestId === generation && initial) setLoading(false)
+        stopped.signal.removeEventListener('abort', stopThisRequest)
+        if (!request.signal.aborted && initial) setLoading(false)
+        if (!stopped.signal.aborted && activeRequest === request) {
+          timer = window.setTimeout(() => {
+            void load(false)
+          }, 15000)
+        }
       }
     }
 
     void load(true)
-    timer = window.setInterval(() => {
-      void load(false)
-    }, 15000)
 
     return () => {
-      controller.abort()
-      window.clearInterval(timer)
+      stopped.abort()
+      activeRequest?.abort()
+      window.clearTimeout(timer)
     }
   }, [station, line])
 

@@ -16,7 +16,8 @@ type RawPayload = {
   message?: string
   isdelay?: string
   curr_time?: string
-  data?: Record<string, { UP?: RawTrain[]; DOWN?: RawTrain[] }>
+  sys_time?: string
+  data?: Record<string, { UP?: RawTrain[]; DOWN?: RawTrain[]; curr_time?: string }>
 }
 
 export type DisplayTrain = {
@@ -52,9 +53,22 @@ function destinationName(code: string | undefined) {
   return stationByCode[code]?.name ?? code
 }
 
-function whenLabel(ttnt: string | undefined) {
-  const minutes = Number(ttnt)
-  if (!Number.isFinite(minutes) || minutes <= 0) return '即將開出'
+const HONG_KONG_OFFSET_MS = 8 * 60 * 60 * 1000
+
+function parseHongKongTime(value: string | undefined) {
+  if (!value) return null
+  const match = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/.exec(value)
+  if (!match) return null
+  const [, year, month, day, hour, minute, second] = match
+  return Date.UTC(+year, +month - 1, +day, +hour, +minute, +second) - HONG_KONG_OFFSET_MS
+}
+
+function whenLabel(trainTime: string | undefined, reference: string | undefined) {
+  const due = parseHongKongTime(trainTime)
+  const now = parseHongKongTime(reference)
+  if (due === null || now === null) return '即將開出'
+  const minutes = Math.round((due - now) / 60000)
+  if (minutes <= 0) return '即將開出'
   return minutes === 1 ? '約 1 分鐘' : `約 ${minutes} 分鐘`
 }
 
@@ -63,13 +77,13 @@ function clockLabel(time: string | undefined) {
   return time.slice(11, 16)
 }
 
-function presentTrains(trains: RawTrain[]): DisplayTrain[] {
+function presentTrains(trains: RawTrain[], reference: string | undefined): DisplayTrain[] {
   return trains
     .filter((train) => train.valid !== 'N')
     .map((train) => ({
       destination: destinationName(train.dest),
       platform: train.plat ? `${train.plat} 號月台` : '月台未明',
-      when: whenLabel(train.ttnt),
+      when: whenLabel(train.time, reference),
       clock: clockLabel(train.time),
       viaRacecourse: train.route === 'RAC',
     }))
@@ -92,9 +106,10 @@ export function interpretSchedule(station: Station, line: string, payload: RawPa
   }
 
   const bucket = payload.data?.[`${line}-${station.code}`]
-  const up = presentTrains(bucket?.UP ?? [])
-  const down = presentTrains(bucket?.DOWN ?? [])
-  const updatedAt = payload.curr_time ? payload.curr_time.slice(11, 16) : null
+  const reference = bucket?.curr_time ?? payload.curr_time ?? payload.sys_time
+  const up = presentTrains(bucket?.UP ?? [], reference)
+  const down = presentTrains(bucket?.DOWN ?? [], reference)
+  const updatedAt = reference ? reference.slice(11, 16) : null
   const delay = payload.isdelay === 'Y'
 
   if (up.length === 0 && down.length === 0) {
@@ -117,10 +132,18 @@ export function interpretSchedule(station: Station, line: string, payload: RawPa
   }
 }
 
+const REQUEST_TIMEOUT_MS = 12000
+
 export async function fetchSchedule(station: Station, line: string, signal: AbortSignal) {
   if (!lineByCode[line] || !station.lines.includes(line)) {
     throw new ScheduleRequestError('這站沒有這條綫的班次。')
   }
+
+  const timeout = new AbortController()
+  const timer = setTimeout(() => timeout.abort(), REQUEST_TIMEOUT_MS)
+  const onAbort = () => timeout.abort()
+  if (signal.aborted) timeout.abort()
+  else signal.addEventListener('abort', onAbort)
 
   let response: Response
   try {
@@ -128,10 +151,14 @@ export async function fetchSchedule(station: Station, line: string, signal: Abor
     url.searchParams.set('line', line)
     url.searchParams.set('sta', station.code)
     url.searchParams.set('lang', 'TC')
-    response = await fetch(url, { signal })
+    response = await fetch(url, { signal: timeout.signal })
   } catch (error) {
     if (signal.aborted) throw error
+    if (timeout.signal.aborted) throw new ScheduleRequestError('查詢逾時，請稍後再試。')
     throw new ScheduleRequestError('暫時無法連到港鐵到站資料，請稍後再試。')
+  } finally {
+    clearTimeout(timer)
+    signal.removeEventListener('abort', onAbort)
   }
 
   if (response.status === 429) {

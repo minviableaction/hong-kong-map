@@ -192,7 +192,7 @@ function App() {
               }}
             />
           ) : camera ? (
-            <CameraPanel camera={camera} onClose={() => setCameraKey(null)} />
+            <CameraPanel key={camera.key} camera={camera} onClose={() => setCameraKey(null)} />
           ) : null}
         </div>
       ) : null}

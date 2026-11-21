@@ -10,6 +10,21 @@ import { useEffect, useRef } from 'react'
 
 const STYLE = 'https://tiles.openfreemap.org/styles/liberty'
 
+function stationFocusData(code: string | null) {
+  const station = code ? stationByCode[code] : undefined
+  if (!station) return { type: 'FeatureCollection' as const, features: [] }
+  return {
+    type: 'FeatureCollection' as const,
+    features: [
+      {
+        type: 'Feature' as const,
+        properties: {},
+        geometry: { type: 'Point' as const, coordinates: [station.lon, station.lat] },
+      },
+    ],
+  }
+}
+
 type MapViewProps = {
   showNetwork: boolean
   showCameras: boolean
@@ -36,11 +51,13 @@ export function MapView({
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<Map | null>(null)
   const camerasRef = useRef(cameras)
+  const selectedStationRef = useRef(selectedStation)
   const visibilityRef = useRef({ showNetwork, showCameras })
   const handlersRef = useRef({ onSelectStation, onSelectCamera })
 
   useEffect(() => {
     camerasRef.current = cameras
+    selectedStationRef.current = selectedStation
     visibilityRef.current = { showNetwork, showCameras }
     handlersRef.current = { onSelectStation, onSelectCamera }
   })
@@ -167,7 +184,7 @@ export function MapView({
 
       map.addSource('station-focus', {
         type: 'geojson',
-        data: { type: 'FeatureCollection', features: [] },
+        data: stationFocusData(selectedStationRef.current),
       })
       map.addLayer({
         id: 'station-focus',
@@ -256,21 +273,7 @@ export function MapView({
     const map = mapRef.current
     const source = map?.getSource('station-focus')
     if (!source || !('setData' in source)) return
-    const station = selectedStation ? stationByCode[selectedStation] : undefined
-    ;(source as GeoJSONSource).setData(
-      station
-        ? {
-            type: 'FeatureCollection',
-            features: [
-              {
-                type: 'Feature',
-                properties: {},
-                geometry: { type: 'Point', coordinates: [station.lon, station.lat] },
-              },
-            ],
-          }
-        : { type: 'FeatureCollection', features: [] },
-    )
+    ;(source as GeoJSONSource).setData(stationFocusData(selectedStation))
   }, [selectedStation])
 
   useEffect(() => {
