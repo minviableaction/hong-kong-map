@@ -1,4 +1,4 @@
-import { cameraImageResponse } from '../../src/server/liveCache.ts'
+import { cameraImageResponse } from '../src/server/liveCache.ts'
 
 export function GET(request: Request) {
   const url = new URL(request.url)
