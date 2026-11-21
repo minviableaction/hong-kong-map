@@ -10,8 +10,33 @@
     />
     <title>香港智慧城市地圖</title>
   </head>
-  <body>
-    <div id="root"></div>
+  <body style="margin: 0; background: #f5f5f4; color: #1c1917">
+    <div id="root">
+      <div
+        id="boot"
+        style="box-sizing: border-box; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; font-family: sans-serif"
+      >
+        <div>
+          <h1 style="font-size: 20px; font-weight: 600; margin: 0 0 8px">香港智慧城市地圖</h1>
+          <p id="boot-status" style="margin: 0; font-size: 14px; line-height: 1.6">正在載入地圖…</p>
+        </div>
+      </div>
+    </div>
+    <noscript>
+      <p style="padding: 24px; text-align: center; font-family: sans-serif">這個地圖需要開啟 JavaScript。</p>
+    </noscript>
+    <script>
+      window.addEventListener('error', function (event) {
+        var status = document.getElementById('boot-status')
+        if (!status) return
+        status.textContent = '地圖程式沒有啟動：' + (event.message || '未知錯誤')
+      })
+      window.setTimeout(function () {
+        var status = document.getElementById('boot-status')
+        if (!status) return
+        status.textContent = '地圖程式未能完成載入。請重新整理；如果仍然是空白，請用無痕視窗再開一次。'
+      }, 12000)
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

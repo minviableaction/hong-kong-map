@@ -58,7 +58,7 @@ function App() {
   }
 
   return (
-    <main className="relative h-dvh w-full overflow-hidden bg-stone-100">
+    <main className="relative h-full min-h-screen w-full overflow-hidden bg-stone-100">
       <MapView
         showNetwork={showNetwork}
         showCameras={showCameras}
