@@ -282,23 +282,12 @@ export function MapView({
       }
       map.addSource('trains', { type: 'geojson', data: trainFeatures(runsRef.current, Date.now(), map.getZoom()) })
       map.addLayer({
-        id: 'trains-dot',
-        type: 'circle',
-        source: 'trains',
-        paint: {
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 9, 13, 11, 16, 13],
-          'circle-color': ['get', 'color'],
-          'circle-stroke-color': '#ffffff',
-          'circle-stroke-width': 3,
-        },
-      })
-      map.addLayer({
         id: 'trains',
         type: 'symbol',
         source: 'trains',
         layout: {
           'icon-image': ['concat', 'train-', ['slice', ['get', 'color'], 1]],
-          'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 1.15, 13, 1, 16, 1.15],
+          'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 0.62, 13, 0.78, 16, 1],
           'icon-allow-overlap': true,
           'icon-ignore-placement': true,
           'icon-pitch-alignment': 'viewport',
@@ -325,7 +314,7 @@ export function MapView({
         },
       })
 
-      const interactive = ['trains', 'trains-dot', 'stations', 'cameras', 'cameras-cluster']
+      const interactive = ['trains', 'stations', 'cameras', 'cameras-cluster']
       for (const layer of interactive) {
         map.on('mouseenter', layer, () => {
           map.getCanvas().style.cursor = 'pointer'
@@ -336,7 +325,7 @@ export function MapView({
       }
       const networkVisibility = visibilityRef.current.showNetwork ? 'visible' : 'none'
       const cameraVisibility = visibilityRef.current.showCameras ? 'visible' : 'none'
-      for (const layer of ['mtr-lines', 'mtr-lines-casing', 'stations', 'station-labels', 'station-focus', 'trains-dot', 'trains', 'train-labels']) {
+      for (const layer of ['mtr-lines', 'mtr-lines-casing', 'stations', 'station-labels', 'station-focus', 'trains', 'train-labels']) {
         map.setLayoutProperty(layer, 'visibility', networkVisibility)
       }
       for (const layer of ['cameras', 'cameras-cluster', 'cameras-count']) {
@@ -361,7 +350,7 @@ export function MapView({
           })
           return
         }
-        if ((layerId === 'trains' || layerId === 'trains-dot') && typeof feature.properties?.station === 'string') {
+        if (layerId === 'trains' && typeof feature.properties?.station === 'string') {
           handlersRef.current.onSelectStation(feature.properties.station)
         }
         if (layerId === 'stations' && typeof feature.properties?.code === 'string') {
@@ -406,7 +395,7 @@ export function MapView({
     if (!map?.getLayer('mtr-lines')) return
     const networkVisibility = showNetwork ? 'visible' : 'none'
     const cameraVisibility = showCameras ? 'visible' : 'none'
-    for (const layer of ['mtr-lines', 'mtr-lines-casing', 'stations', 'station-labels', 'station-focus', 'trains-dot', 'trains', 'train-labels']) {
+    for (const layer of ['mtr-lines', 'mtr-lines-casing', 'stations', 'station-labels', 'station-focus', 'trains', 'train-labels']) {
       map.setLayoutProperty(layer, 'visibility', networkVisibility)
     }
     for (const layer of ['cameras', 'cameras-cluster', 'cameras-count']) {
