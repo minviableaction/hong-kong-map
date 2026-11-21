@@ -35,7 +35,14 @@ let cameraRefresh: Promise<void> | null = null
 
 type ImageEntry = { at: number; body: Uint8Array; type: string }
 const images = new Map<string, ImageEntry>()
-const imageRefresh = new Map<string, Promise<void>>()
+const imageRefresh = new Map<string, Promise<ImageFetch>>()
+const imageBlockedUntil = new Map<string, number>()
+const imageUpstreamAt: number[] = []
+const IMAGE_UPSTREAM_WINDOW_MS = 10_000
+const IMAGE_UPSTREAM_BUDGET = 8
+const IMAGE_FAILURE_COOLDOWN_MS = 60_000
+
+type ImageFetch = 'ok' | 'throttled' | 'failed'
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -265,13 +272,37 @@ function rememberImage(key: string, entry: ImageEntry) {
   }
 }
 
-async function refreshImage(key: string) {
-  const response = await fetch(`${CAMERA_IMAGE_ORIGIN}/${key}.JPG`, { signal: AbortSignal.timeout(8000) })
-  const type = response.headers.get('content-type') ?? ''
-  if (!response.ok || !type.startsWith('image/')) return
-  const body = new Uint8Array(await response.arrayBuffer())
-  if (body.byteLength < 32 || body.byteLength > 500_000) return
-  rememberImage(key, { at: Date.now(), body, type })
+function allowImageUpstream() {
+  const now = Date.now()
+  while (imageUpstreamAt.length > 0 && now - imageUpstreamAt[0] > IMAGE_UPSTREAM_WINDOW_MS) {
+    imageUpstreamAt.shift()
+  }
+  if (imageUpstreamAt.length >= IMAGE_UPSTREAM_BUDGET) return false
+  imageUpstreamAt.push(now)
+  return true
+}
+
+async function refreshImage(key: string): Promise<ImageFetch> {
+  if (!allowImageUpstream()) return 'throttled'
+  try {
+    const response = await fetch(`${CAMERA_IMAGE_ORIGIN}/${key}.JPG`, { signal: AbortSignal.timeout(8000) })
+    const type = response.headers.get('content-type') ?? ''
+    if (!response.ok || !type.startsWith('image/')) {
+      imageBlockedUntil.set(key, Date.now() + IMAGE_FAILURE_COOLDOWN_MS)
+      return 'failed'
+    }
+    const body = new Uint8Array(await response.arrayBuffer())
+    if (body.byteLength < 32 || body.byteLength > 500_000) {
+      imageBlockedUntil.set(key, Date.now() + IMAGE_FAILURE_COOLDOWN_MS)
+      return 'failed'
+    }
+    imageBlockedUntil.delete(key)
+    rememberImage(key, { at: Date.now(), body, type })
+    return 'ok'
+  } catch {
+    imageBlockedUntil.set(key, Date.now() + IMAGE_FAILURE_COOLDOWN_MS)
+    return 'failed'
+  }
 }
 
 function startImageRefresh(key: string) {
@@ -284,20 +315,43 @@ function startImageRefresh(key: string) {
   return pending
 }
 
+function knownCamera(key: string) {
+  return cameraList?.cameras.some((camera) => camera.key === key) ?? false
+}
+
 export async function cameraImageResponse(key: string, fresh: boolean) {
   if (!CAMERA_KEY.test(key)) {
-    return Response.json({ error: '未知的快拍編號。' }, { status: 400 })
+    return Response.json({ error: '未知的快拍編號。' }, { status: 400, headers: { 'cache-control': 'public, max-age=300' } })
+  }
+  if (!cameraList) await startCameraRefresh()
+  if (!knownCamera(key)) {
+    return Response.json(
+      { error: '未知的快拍編號。' },
+      { status: 404, headers: { 'cache-control': 'public, max-age=300' } },
+    )
   }
   const cached = images.get(key)
   const age = cached ? Date.now() - cached.at : Number.POSITIVE_INFINITY
-  const due = age >= IMAGE_FRESH_MS || (fresh && age >= IMAGE_REFRESH_MIN_MS)
+  const blocked = (imageBlockedUntil.get(key) ?? 0) > Date.now()
+  const due = !blocked && (age >= IMAGE_FRESH_MS || (fresh && age >= IMAGE_REFRESH_MIN_MS))
+  let outcome: ImageFetch | 'cached' = 'cached'
   if (due) {
     const pending = startImageRefresh(key)
-    if (!cached) await pending
+    if (!cached) outcome = await pending
   }
   const image = images.get(key)
   if (!image) {
-    return Response.json({ error: '暫時沒有這處的快拍照片。' }, { status: 404, headers: { 'cache-control': 'public, max-age=30' } })
+    const throttled = outcome === 'throttled'
+    return Response.json(
+      { error: throttled ? '快拍相片太忙，請稍後再看。' : '暫時沒有這處的快拍照片。' },
+      {
+        status: throttled ? 429 : 404,
+        headers: {
+          'cache-control': 'public, max-age=15',
+          'retry-after': '15',
+        },
+      },
+    )
   }
   const bytes = new Uint8Array(image.body)
   return new Response(bytes, {
