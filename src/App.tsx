@@ -157,7 +157,7 @@ function App() {
           ))}
         </ul>
         <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
-          橙色標記是交通快拍，縮小時會合併。綫路按行車順序連接，不是隧道實跡。
+          橙色標記是交通快拍，縮小時會合併。路綫沿軌道形狀繪製，並列路軌會併成一條線。
         </p>
       </div>
 
