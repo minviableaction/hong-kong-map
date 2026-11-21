@@ -42,7 +42,7 @@ npm run preview
 
 ## 之後怎樣發佈
 
-驗收通過後，才發佈到 Cloudflare Workers 免費方案，網址用平台提供的 `workers.dev`。Worker 會先查港鐵和運輸署，再把結果交給所有訪客，預計費用是 0 港元。付費方案最低每月 5 美元，這個做法用不到。
+已發佈到 Cloudflare Workers 免費方案：https://hk-smart-city-map.minviableaction.workers.dev 。Worker 會先查港鐵和運輸署，再把結果交給所有訪客。免費方案每次最多向外查 50 次，所以班次分成每分鐘 40 個車站更新。付費方案最低每月 5 美元，這個做法用不到。
 
 屆時在已登入的 Cloudflare 免費帳戶執行：
 
