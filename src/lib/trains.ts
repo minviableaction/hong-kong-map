@@ -225,7 +225,7 @@ export function trainCoordinate(run: TrainRun, now: number, zoom = 11): [number,
     if (remain > 0) return run.path[0]
     return pointAlong(run, fractionAlong(run, now, zoom, Math.min(1, -remain / run.runMs)))
   }
-  if (remain > run.runMs || remain < -20_000) return null
+  if (remain > 40 * 60 * 1000 || remain < -20_000) return null
   const timetableFraction = Math.min(1, Math.max(0, 1 - remain / run.runMs))
   return pointAlong(run, fractionAlong(run, now, zoom, timetableFraction))
 }

@@ -124,26 +124,61 @@ async function saveStore(store: ScheduleStore) {
   schedule = store
   const cache = edgeCache()
   if (!cache) return
-  await cache.put(
-    STORE_URL,
-    new Response(JSON.stringify(store), { headers: { 'content-type': 'application/json' } }),
-  )
+  try {
+    await cache.put(
+      STORE_URL,
+      new Response(JSON.stringify(store), { headers: { 'content-type': 'application/json' } }),
+    )
+  } catch {
+    // This instance still serves the merged snapshot if the edge cache rejects the write.
+  }
+}
+
+const URBAN_FIRST = new Set([
+  'CEN', 'ADM', 'TST', 'JOR', 'YMT', 'MOK', 'HOK', 'KOW', 'HKU', 'SYP', 'SHW', 'WAC',
+  'EXC', 'MKK', 'HUH', 'NOP', 'QUB', 'TAW',
+])
+
+function refreshOrder() {
+  const byLine = new Map<string, { line: string; station: string }[]>()
+  for (const job of stationJobs()) {
+    const list = byLine.get(job.line) ?? []
+    list.push(job)
+    byLine.set(job.line, list)
+  }
+  for (const list of byLine.values()) {
+    list.sort((a, b) => Number(URBAN_FIRST.has(b.station)) - Number(URBAN_FIRST.has(a.station)))
+  }
+  const lines = [...byLine.keys()]
+  const ordered: { line: string; station: string }[] = []
+  let index = 0
+  let remaining = stationJobs().length
+  while (remaining > 0) {
+    for (const line of lines) {
+      const list = byLine.get(line) ?? []
+      if (index < list.length) {
+        ordered.push(list[index])
+        remaining -= 1
+      }
+    }
+    index += 1
+  }
+  return ordered
 }
 
 async function refreshSchedules() {
-  const jobs = stationJobs()
-  const onEdge = edgeCache() !== null
-  const chunk = onEdge ? Math.min(WORKER_CHUNK, jobs.length) : jobs.length
+  const jobs = refreshOrder()
   const store = (await loadStore()) ?? { fetchedAt: 0, updatedAt: 0, cursor: 0, stations: {} }
   const stations: Record<string, CachedStation> = { ...store.stations }
+  const chunk = Math.min(WORKER_CHUNK, jobs.length)
   const selected = Array.from({ length: chunk }, (_, offset) => jobs[(store.cursor + offset) % jobs.length])
-  let cursor = 0
+  let taken = 0
   let blocked = false
 
   async function worker() {
     while (!blocked) {
-      const index = cursor
-      cursor += 1
+      const index = taken
+      taken += 1
       if (index >= selected.length) return
       const job = selected[index]
       const result = await fetchStation(job.line, job.station)
@@ -157,10 +192,11 @@ async function refreshSchedules() {
   }
 
   await Promise.all(Array.from({ length: Math.min(UPSTREAM_CONCURRENCY, selected.length) }, () => worker()))
-  const nextCursor = (store.cursor + selected.length) % jobs.length
-  const completedCycle = !onEdge || nextCursor === 0
+  const finished = blocked ? Math.max(0, taken - 1) : selected.length
+  const nextCursor = (store.cursor + finished) % jobs.length
+  const covered = Object.keys(stations).length >= jobs.length
   const next: ScheduleStore = {
-    fetchedAt: completedCycle ? Date.now() : store.fetchedAt,
+    fetchedAt: !blocked && covered && nextCursor === 0 ? Date.now() : store.fetchedAt,
     updatedAt: Date.now(),
     cursor: nextCursor,
     stations,
@@ -171,7 +207,8 @@ async function refreshSchedules() {
 function shouldRefresh(store: ScheduleStore | null) {
   if (Date.now() < scheduleBlockedUntil && store && Object.keys(store.stations).length > 0) return false
   if (!store || Object.keys(store.stations).length === 0) return true
-  if (store.cursor !== 0) return Date.now() - store.updatedAt >= 55_000
+  const incomplete = Object.keys(store.stations).length < stationJobs().length || store.cursor !== 0
+  if (incomplete) return Date.now() - store.updatedAt >= 8_000
   return Date.now() - store.fetchedAt >= SCHEDULE_FRESH_MS
 }
 
@@ -186,17 +223,23 @@ function startScheduleRefresh() {
 
 export async function trainsResponse() {
   if (!schedule) await loadStore()
-  const missing = !schedule || Object.keys(schedule.stations).length === 0
+  const covered = Object.keys(schedule?.stations ?? {}).length
+  const thin = covered < 80
   if (shouldRefresh(schedule)) {
     const pending = startScheduleRefresh()
-    if (missing) await pending
+    if (thin) await pending
   }
   const age = schedule?.fetchedAt ? Date.now() - schedule.fetchedAt : Number.POSITIVE_INFINITY
   const hit = !schedule ? 'MISS' : age < SCHEDULE_FRESH_MS ? 'HIT' : 'STALE'
   const body: TrainSnapshot = schedule
     ? { fetchedAt: schedule.fetchedAt, stations: schedule.stations }
     : { fetchedAt: 0, stations: {} }
-  return Response.json(body, { headers: cacheHeaders(hit) })
+  return Response.json(body, {
+    headers: cacheHeaders(hit, {
+      'x-schedule-stations': String(Object.keys(body.stations).length),
+      'x-schedule-cursor': String(schedule?.cursor ?? 0),
+    }),
+  })
 }
 
 export async function warmSchedules() {
