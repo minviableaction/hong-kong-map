@@ -1,0 +1,2882 @@
+{
+  "source": "OpenStreetMap via the Geofabrik Hong Kong extract of 2026-11-21, matched to official MTR codes. Racecourse is in the next-train specification and is absent from the lines file. Mei Foo is the midpoint of two nearby OpenStreetMap nodes.",
+  "lines": [
+    {
+      "code": "AEL",
+      "name": "機場快綫",
+      "color": "#1C7670"
+    },
+    {
+      "code": "TCL",
+      "name": "東涌綫",
+      "color": "#F7943E"
+    },
+    {
+      "code": "TML",
+      "name": "屯馬綫",
+      "color": "#9A3B26"
+    },
+    {
+      "code": "TKL",
+      "name": "將軍澳綫",
+      "color": "#6B208B"
+    },
+    {
+      "code": "EAL",
+      "name": "東鐵綫",
+      "color": "#5EB6E4"
+    },
+    {
+      "code": "SIL",
+      "name": "南港島綫",
+      "color": "#B5A800"
+    },
+    {
+      "code": "TWL",
+      "name": "荃灣綫",
+      "color": "#E2231A"
+    },
+    {
+      "code": "ISL",
+      "name": "港島綫",
+      "color": "#007DC5"
+    },
+    {
+      "code": "KTL",
+      "name": "觀塘綫",
+      "color": "#1A9431"
+    },
+    {
+      "code": "DRL",
+      "name": "迪士尼綫",
+      "color": "#F550A6"
+    }
+  ],
+  "stations": [
+    {
+      "code": "SHS",
+      "name": "上水",
+      "en": "Sheung Shui",
+      "lat": 22.501162,
+      "lon": 114.128033,
+      "lines": [
+        "EAL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "SHW",
+      "name": "上環",
+      "en": "Sheung Wan",
+      "lat": 22.286795,
+      "lon": 114.152623,
+      "lines": [
+        "ISL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "CEN",
+      "name": "中環",
+      "en": "Central",
+      "lat": 22.281709,
+      "lon": 114.158883,
+      "lines": [
+        "TWL",
+        "ISL"
+      ],
+      "terminalLines": [
+        "TWL"
+      ]
+    },
+    {
+      "code": "KOW",
+      "name": "九龍",
+      "en": "Kowloon",
+      "lat": 22.304925,
+      "lon": 114.1616,
+      "lines": [
+        "AEL",
+        "TCL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "KOT",
+      "name": "九龍塘",
+      "en": "Kowloon Tong",
+      "lat": 22.33682,
+      "lon": 114.176875,
+      "lines": [
+        "EAL",
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "KOB",
+      "name": "九龍灣",
+      "en": "Kowloon Bay",
+      "lat": 22.323422,
+      "lon": 114.214053,
+      "lines": [
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "JOR",
+      "name": "佐敦",
+      "en": "Jordan",
+      "lat": 22.304947,
+      "lon": 114.171672,
+      "lines": [
+        "TWL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "HOM",
+      "name": "何文田",
+      "en": "Ho Man Tin",
+      "lat": 22.3094,
+      "lon": 114.182576,
+      "lines": [
+        "TML",
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "YUL",
+      "name": "元朗",
+      "en": "Yuen Long",
+      "lat": 22.446191,
+      "lon": 114.03491,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "SIH",
+      "name": "兆康",
+      "en": "Siu Hong",
+      "lat": 22.412012,
+      "lon": 113.978749,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "LET",
+      "name": "利東",
+      "en": "Lei Tung",
+      "lat": 22.241958,
+      "lon": 114.155912,
+      "lines": [
+        "SIL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "NOP",
+      "name": "北角",
+      "en": "North Point",
+      "lat": 22.290909,
+      "lon": 114.200753,
+      "lines": [
+        "TKL",
+        "ISL"
+      ],
+      "terminalLines": [
+        "TKL"
+      ]
+    },
+    {
+      "code": "NAC",
+      "name": "南昌",
+      "en": "Nam Cheong",
+      "lat": 22.326289,
+      "lon": 114.153489,
+      "lines": [
+        "TCL",
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "AWE",
+      "name": "博覽館",
+      "en": "AsiaWorld-Expo",
+      "lat": 22.321988,
+      "lon": 113.942221,
+      "lines": [
+        "AEL"
+      ],
+      "terminalLines": [
+        "AEL"
+      ]
+    },
+    {
+      "code": "KAT",
+      "name": "啟德",
+      "en": "Kai Tak",
+      "lat": 22.330888,
+      "lon": 114.199612,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "TKW",
+      "name": "土瓜灣",
+      "en": "To Kwa Wan",
+      "lat": 22.31694,
+      "lon": 114.187615,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "HAH",
+      "name": "坑口",
+      "en": "Hang Hau",
+      "lat": 22.314587,
+      "lon": 114.264678,
+      "lines": [
+        "TKL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "KET",
+      "name": "堅尼地城",
+      "en": "Kennedy Town",
+      "lat": 22.281331,
+      "lon": 114.128622,
+      "lines": [
+        "ISL"
+      ],
+      "terminalLines": [
+        "ISL"
+      ]
+    },
+    {
+      "code": "TAW",
+      "name": "大圍",
+      "en": "Tai Wai",
+      "lat": 22.373025,
+      "lon": 114.17852,
+      "lines": [
+        "TML",
+        "EAL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "TAP",
+      "name": "大埔墟",
+      "en": "Tai Po Market",
+      "lat": 22.444651,
+      "lon": 114.170635,
+      "lines": [
+        "EAL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "UNI",
+      "name": "大學",
+      "en": "University",
+      "lat": 22.413569,
+      "lon": 114.210103,
+      "lines": [
+        "EAL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "TSH",
+      "name": "大水坑",
+      "en": "Tai Shui Hang",
+      "lat": 22.408306,
+      "lon": 114.222637,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "TWH",
+      "name": "大窩口",
+      "en": "Tai Wo Hau",
+      "lat": 22.370804,
+      "lon": 114.125071,
+      "lines": [
+        "TWL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "TIH",
+      "name": "天后",
+      "en": "Tin Hau",
+      "lat": 22.282446,
+      "lon": 114.191816,
+      "lines": [
+        "ISL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "TIS",
+      "name": "天水圍",
+      "en": "Tin Shui Wai",
+      "lat": 22.44787,
+      "lon": 114.004409,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "TAK",
+      "name": "太古",
+      "en": "Tai Koo",
+      "lat": 22.284637,
+      "lon": 114.216322,
+      "lines": [
+        "ISL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "TWO",
+      "name": "太和",
+      "en": "Tai Wo",
+      "lat": 22.451004,
+      "lon": 114.161054,
+      "lines": [
+        "EAL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "PRE",
+      "name": "太子",
+      "en": "Prince Edward",
+      "lat": 22.324455,
+      "lon": 114.168302,
+      "lines": [
+        "TWL",
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "OLY",
+      "name": "奧運",
+      "en": "Olympic",
+      "lat": 22.317859,
+      "lon": 114.160225,
+      "lines": [
+        "TCL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "SUW",
+      "name": "宋皇臺",
+      "en": "Sung Wong Toi",
+      "lat": 22.325806,
+      "lon": 114.191038,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "POA",
+      "name": "寶琳",
+      "en": "Po Lam",
+      "lat": 22.322377,
+      "lon": 114.257876,
+      "lines": [
+        "TKL"
+      ],
+      "terminalLines": [
+        "TKL"
+      ]
+    },
+    {
+      "code": "TKO",
+      "name": "將軍澳",
+      "en": "Tseung Kwan O",
+      "lat": 22.307356,
+      "lon": 114.259858,
+      "lines": [
+        "TKL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "ETS",
+      "name": "尖東",
+      "en": "East Tsim Sha Tsui",
+      "lat": 22.295561,
+      "lon": 114.175072,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "TST",
+      "name": "尖沙咀",
+      "en": "Tsim Sha Tsui",
+      "lat": 22.297618,
+      "lon": 114.172317,
+      "lines": [
+        "TWL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "TUM",
+      "name": "屯門",
+      "en": "Tuen Mun",
+      "lat": 22.394589,
+      "lon": 113.973085,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": [
+        "TML"
+      ]
+    },
+    {
+      "code": "LHP",
+      "name": "康城",
+      "en": "LOHAS Park",
+      "lat": 22.295559,
+      "lon": 114.268752,
+      "lines": [
+        "TKL"
+      ],
+      "terminalLines": [
+        "TKL"
+      ]
+    },
+    {
+      "code": "CHH",
+      "name": "彩虹",
+      "en": "Choi Hung",
+      "lat": 22.334477,
+      "lon": 114.209282,
+      "lines": [
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "HEO",
+      "name": "恆安",
+      "en": "Heng On",
+      "lat": 22.417475,
+      "lon": 114.225728,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "MOK",
+      "name": "旺角",
+      "en": "Mong Kok",
+      "lat": 22.319549,
+      "lon": 114.169326,
+      "lines": [
+        "TWL",
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "MKK",
+      "name": "旺角東",
+      "en": "Mong Kok East",
+      "lat": 22.321977,
+      "lon": 114.172625,
+      "lines": [
+        "EAL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "EXC",
+      "name": "會展",
+      "en": "Exhibition Centre",
+      "lat": 22.281613,
+      "lon": 114.17569,
+      "lines": [
+        "EAL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "LOP",
+      "name": "朗屏",
+      "en": "Long Ping",
+      "lat": 22.447666,
+      "lon": 114.025348,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "HFC",
+      "name": "杏花邨",
+      "en": "Heng Fa Chuen",
+      "lat": 22.276673,
+      "lon": 114.23972,
+      "lines": [
+        "ISL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "TUC",
+      "name": "東涌",
+      "en": "Tung Chung",
+      "lat": 22.289245,
+      "lon": 113.941374,
+      "lines": [
+        "TCL"
+      ],
+      "terminalLines": [
+        "TCL"
+      ]
+    },
+    {
+      "code": "AUS",
+      "name": "柯士甸",
+      "en": "Austin",
+      "lat": 22.304236,
+      "lon": 114.166601,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "CHW",
+      "name": "柴灣",
+      "en": "Chai Wan",
+      "lat": 22.264453,
+      "lon": 114.237044,
+      "lines": [
+        "ISL"
+      ],
+      "terminalLines": [
+        "ISL"
+      ]
+    },
+    {
+      "code": "LOF",
+      "name": "樂富",
+      "en": "Lok Fu",
+      "lat": 22.338023,
+      "lon": 114.187233,
+      "lines": [
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "AIR",
+      "name": "機場",
+      "en": "Airport",
+      "lat": 22.315866,
+      "lon": 113.936437,
+      "lines": [
+        "AEL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "SUN",
+      "name": "欣澳",
+      "en": "Sunny Bay",
+      "lat": 22.331984,
+      "lon": 114.028915,
+      "lines": [
+        "TCL",
+        "DRL"
+      ],
+      "terminalLines": [
+        "DRL"
+      ]
+    },
+    {
+      "code": "SHT",
+      "name": "沙田",
+      "en": "Sha Tin",
+      "lat": 22.383119,
+      "lon": 114.187822,
+      "lines": [
+        "EAL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "STW",
+      "name": "沙田圍",
+      "en": "Sha Tin Wai",
+      "lat": 22.376876,
+      "lon": 114.194759,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "YAT",
+      "name": "油塘",
+      "en": "Yau Tong",
+      "lat": 22.297788,
+      "lon": 114.237159,
+      "lines": [
+        "TKL",
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "YMT",
+      "name": "油麻地",
+      "en": "Yau Ma Tei",
+      "lat": 22.313012,
+      "lon": 114.170546,
+      "lines": [
+        "TWL",
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "SOH",
+      "name": "海怡半島",
+      "en": "South Horizons",
+      "lat": 22.242944,
+      "lon": 114.148693,
+      "lines": [
+        "SIL"
+      ],
+      "terminalLines": [
+        "SIL"
+      ]
+    },
+    {
+      "code": "OCP",
+      "name": "海洋公園",
+      "en": "Ocean Park",
+      "lat": 22.248547,
+      "lon": 114.174286,
+      "lines": [
+        "SIL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "SSP",
+      "name": "深水埗",
+      "en": "Sham Shui Po",
+      "lat": 22.330697,
+      "lon": 114.162374,
+      "lines": [
+        "TWL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "WAC",
+      "name": "灣仔",
+      "en": "Wan Chai",
+      "lat": 22.277584,
+      "lon": 114.17286,
+      "lines": [
+        "ISL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "FOT",
+      "name": "火炭",
+      "en": "Fo Tan",
+      "lat": 22.395319,
+      "lon": 114.198147,
+      "lines": [
+        "EAL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "FOH",
+      "name": "炮台山",
+      "en": "Fortress Hill",
+      "lat": 22.287563,
+      "lon": 114.193315,
+      "lines": [
+        "ISL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "WKS",
+      "name": "烏溪沙",
+      "en": "Wu Kai Sha",
+      "lat": 22.429194,
+      "lon": 114.243777,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": [
+        "TML"
+      ]
+    },
+    {
+      "code": "NTK",
+      "name": "牛頭角",
+      "en": "Ngau Tau Kok",
+      "lat": 22.315516,
+      "lon": 114.219071,
+      "lines": [
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "SKM",
+      "name": "石硤尾",
+      "en": "Shek Kip Mei",
+      "lat": 22.331892,
+      "lon": 114.168872,
+      "lines": [
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "SHM",
+      "name": "石門",
+      "en": "Shek Mun",
+      "lat": 22.387407,
+      "lon": 114.208065,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "CIO",
+      "name": "第一城",
+      "en": "City One",
+      "lat": 22.382779,
+      "lon": 114.20342,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "SKW",
+      "name": "筲箕灣",
+      "en": "Shau Kei Wan",
+      "lat": 22.279154,
+      "lon": 114.228898,
+      "lines": [
+        "ISL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "FAN",
+      "name": "粉嶺",
+      "en": "Fanling",
+      "lat": 22.491968,
+      "lon": 114.138813,
+      "lines": [
+        "EAL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "HUH",
+      "name": "紅磡",
+      "en": "Hung Hom",
+      "lat": 22.302901,
+      "lon": 114.182248,
+      "lines": [
+        "TML",
+        "EAL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "LOW",
+      "name": "羅湖",
+      "en": "Lo Wu",
+      "lat": 22.528177,
+      "lon": 114.113339,
+      "lines": [
+        "EAL"
+      ],
+      "terminalLines": [
+        "EAL"
+      ]
+    },
+    {
+      "code": "MEF",
+      "name": "美孚",
+      "en": "Mei Foo",
+      "lat": 22.338409,
+      "lon": 114.137868,
+      "lines": [
+        "TML",
+        "TWL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "TSW",
+      "name": "荃灣",
+      "en": "Tsuen Wan",
+      "lat": 22.373713,
+      "lon": 114.117655,
+      "lines": [
+        "TWL"
+      ],
+      "terminalLines": [
+        "TWL"
+      ]
+    },
+    {
+      "code": "TWW",
+      "name": "荃灣西",
+      "en": "Tsuen Wan West",
+      "lat": 22.368148,
+      "lon": 114.110074,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "LAK",
+      "name": "荔景",
+      "en": "Lai King",
+      "lat": 22.348449,
+      "lon": 114.126019,
+      "lines": [
+        "TCL",
+        "TWL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "LCK",
+      "name": "荔枝角",
+      "en": "Lai Chi Kok",
+      "lat": 22.337396,
+      "lon": 114.148414,
+      "lines": [
+        "TWL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "LMC",
+      "name": "落馬洲",
+      "en": "Lok Ma Chau",
+      "lat": 22.514475,
+      "lon": 114.065634,
+      "lines": [
+        "EAL"
+      ],
+      "terminalLines": [
+        "EAL"
+      ]
+    },
+    {
+      "code": "KWH",
+      "name": "葵興",
+      "en": "Kwai Hing",
+      "lat": 22.363211,
+      "lon": 114.131194,
+      "lines": [
+        "TWL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "KWF",
+      "name": "葵芳",
+      "en": "Kwai Fong",
+      "lat": 22.356802,
+      "lon": 114.127749,
+      "lines": [
+        "TWL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "LAT",
+      "name": "藍田",
+      "en": "Lam Tin",
+      "lat": 22.307301,
+      "lon": 114.232946,
+      "lines": [
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "SWH",
+      "name": "西灣河",
+      "en": "Sai Wan Ho",
+      "lat": 22.28163,
+      "lon": 114.222289,
+      "lines": [
+        "ISL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "SYP",
+      "name": "西營盤",
+      "en": "Sai Ying Pun",
+      "lat": 22.285435,
+      "lon": 114.142642,
+      "lines": [
+        "ISL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "KWT",
+      "name": "觀塘",
+      "en": "Kwun Tong",
+      "lat": 22.312147,
+      "lon": 114.226455,
+      "lines": [
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "TIK",
+      "name": "調景嶺",
+      "en": "Tiu Keng Leng",
+      "lat": 22.304075,
+      "lon": 114.25237,
+      "lines": [
+        "TKL",
+        "KTL"
+      ],
+      "terminalLines": [
+        "KTL"
+      ]
+    },
+    {
+      "code": "CKT",
+      "name": "車公廟",
+      "en": "Che Kung Temple",
+      "lat": 22.374732,
+      "lon": 114.186294,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "DIS",
+      "name": "迪士尼",
+      "en": "Disneyland Resort",
+      "lat": 22.315415,
+      "lon": 114.045139,
+      "lines": [
+        "DRL"
+      ],
+      "terminalLines": [
+        "DRL"
+      ]
+    },
+    {
+      "code": "ADM",
+      "name": "金鐘",
+      "en": "Admiralty",
+      "lat": 22.279017,
+      "lon": 114.165064,
+      "lines": [
+        "EAL",
+        "SIL",
+        "TWL",
+        "ISL"
+      ],
+      "terminalLines": [
+        "EAL",
+        "SIL"
+      ]
+    },
+    {
+      "code": "CAB",
+      "name": "銅鑼灣",
+      "en": "Causeway Bay",
+      "lat": 22.280005,
+      "lon": 114.183316,
+      "lines": [
+        "ISL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "KSR",
+      "name": "錦上路",
+      "en": "Kam Sheung Road",
+      "lat": 22.434861,
+      "lon": 114.06333,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "DIH",
+      "name": "鑽石山",
+      "en": "Diamond Hill",
+      "lat": 22.339779,
+      "lon": 114.201366,
+      "lines": [
+        "TML",
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "CSW",
+      "name": "長沙灣",
+      "en": "Cheung Sha Wan",
+      "lat": 22.335507,
+      "lon": 114.15616,
+      "lines": [
+        "TWL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "TSY",
+      "name": "青衣",
+      "en": "Tsing Yi",
+      "lat": 22.358497,
+      "lon": 114.106753,
+      "lines": [
+        "AEL",
+        "TCL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "HIK",
+      "name": "顯徑",
+      "en": "Hin Keng",
+      "lat": 22.364059,
+      "lon": 114.170879,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "HOK",
+      "name": "香港",
+      "en": "Hong Kong",
+      "lat": 22.284607,
+      "lon": 114.158159,
+      "lines": [
+        "AEL",
+        "TCL"
+      ],
+      "terminalLines": [
+        "AEL",
+        "TCL"
+      ]
+    },
+    {
+      "code": "HKU",
+      "name": "香港大學",
+      "en": "HKU",
+      "lat": 22.283976,
+      "lon": 114.135507,
+      "lines": [
+        "ISL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "RAC",
+      "name": "馬場",
+      "en": "Racecourse",
+      "lat": 22.400476,
+      "lon": 114.202899,
+      "lines": [
+        "EAL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "MOS",
+      "name": "馬鞍山",
+      "en": "Ma On Shan",
+      "lat": 22.424676,
+      "lon": 114.23118,
+      "lines": [
+        "TML"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "QUB",
+      "name": "鰂魚涌",
+      "en": "Quarry Bay",
+      "lat": 22.288165,
+      "lon": 114.208992,
+      "lines": [
+        "TKL",
+        "ISL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "WHA",
+      "name": "黃埔",
+      "en": "Whampoa",
+      "lat": 22.304951,
+      "lon": 114.189509,
+      "lines": [
+        "KTL"
+      ],
+      "terminalLines": [
+        "KTL"
+      ]
+    },
+    {
+      "code": "WTS",
+      "name": "黃大仙",
+      "en": "Wong Tai Sin",
+      "lat": 22.34159,
+      "lon": 114.19379,
+      "lines": [
+        "KTL"
+      ],
+      "terminalLines": []
+    },
+    {
+      "code": "WCH",
+      "name": "黃竹坑",
+      "en": "Wong Chuk Hang",
+      "lat": 22.247864,
+      "lon": 114.167512,
+      "lines": [
+        "SIL"
+      ],
+      "terminalLines": []
+    }
+  ],
+  "segments": [
+    {
+      "line": "AEL",
+      "from": "AIR",
+      "to": "AWE",
+      "coordinates": [
+        [
+          113.936437,
+          22.315866
+        ],
+        [
+          113.942221,
+          22.321988
+        ]
+      ]
+    },
+    {
+      "line": "AEL",
+      "from": "AIR",
+      "to": "TSY",
+      "coordinates": [
+        [
+          113.936437,
+          22.315866
+        ],
+        [
+          114.106753,
+          22.358497
+        ]
+      ]
+    },
+    {
+      "line": "AEL",
+      "from": "HOK",
+      "to": "KOW",
+      "coordinates": [
+        [
+          114.158159,
+          22.284607
+        ],
+        [
+          114.1616,
+          22.304925
+        ]
+      ]
+    },
+    {
+      "line": "AEL",
+      "from": "KOW",
+      "to": "TSY",
+      "coordinates": [
+        [
+          114.1616,
+          22.304925
+        ],
+        [
+          114.106753,
+          22.358497
+        ]
+      ]
+    },
+    {
+      "line": "DRL",
+      "from": "DIS",
+      "to": "SUN",
+      "coordinates": [
+        [
+          114.045139,
+          22.315415
+        ],
+        [
+          114.028915,
+          22.331984
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "ADM",
+      "to": "EXC",
+      "coordinates": [
+        [
+          114.165064,
+          22.279017
+        ],
+        [
+          114.17569,
+          22.281613
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "EXC",
+      "to": "HUH",
+      "coordinates": [
+        [
+          114.17569,
+          22.281613
+        ],
+        [
+          114.182248,
+          22.302901
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "FAN",
+      "to": "SHS",
+      "coordinates": [
+        [
+          114.138813,
+          22.491968
+        ],
+        [
+          114.128033,
+          22.501162
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "FAN",
+      "to": "TWO",
+      "coordinates": [
+        [
+          114.138813,
+          22.491968
+        ],
+        [
+          114.161054,
+          22.451004
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "FOT",
+      "to": "RAC",
+      "coordinates": [
+        [
+          114.198147,
+          22.395319
+        ],
+        [
+          114.202899,
+          22.400476
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "FOT",
+      "to": "SHT",
+      "coordinates": [
+        [
+          114.198147,
+          22.395319
+        ],
+        [
+          114.187822,
+          22.383119
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "FOT",
+      "to": "UNI",
+      "coordinates": [
+        [
+          114.198147,
+          22.395319
+        ],
+        [
+          114.210103,
+          22.413569
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "HUH",
+      "to": "MKK",
+      "coordinates": [
+        [
+          114.182248,
+          22.302901
+        ],
+        [
+          114.172625,
+          22.321977
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "KOT",
+      "to": "MKK",
+      "coordinates": [
+        [
+          114.176875,
+          22.33682
+        ],
+        [
+          114.172625,
+          22.321977
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "KOT",
+      "to": "TAW",
+      "coordinates": [
+        [
+          114.176875,
+          22.33682
+        ],
+        [
+          114.17852,
+          22.373025
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "LMC",
+      "to": "SHS",
+      "coordinates": [
+        [
+          114.065634,
+          22.514475
+        ],
+        [
+          114.128033,
+          22.501162
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "LOW",
+      "to": "SHS",
+      "coordinates": [
+        [
+          114.113339,
+          22.528177
+        ],
+        [
+          114.128033,
+          22.501162
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "RAC",
+      "to": "UNI",
+      "coordinates": [
+        [
+          114.202899,
+          22.400476
+        ],
+        [
+          114.210103,
+          22.413569
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "SHT",
+      "to": "TAW",
+      "coordinates": [
+        [
+          114.187822,
+          22.383119
+        ],
+        [
+          114.17852,
+          22.373025
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "TAP",
+      "to": "TWO",
+      "coordinates": [
+        [
+          114.170635,
+          22.444651
+        ],
+        [
+          114.161054,
+          22.451004
+        ]
+      ]
+    },
+    {
+      "line": "EAL",
+      "from": "TAP",
+      "to": "UNI",
+      "coordinates": [
+        [
+          114.170635,
+          22.444651
+        ],
+        [
+          114.210103,
+          22.413569
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "ADM",
+      "to": "CEN",
+      "coordinates": [
+        [
+          114.165064,
+          22.279017
+        ],
+        [
+          114.158883,
+          22.281709
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "ADM",
+      "to": "WAC",
+      "coordinates": [
+        [
+          114.165064,
+          22.279017
+        ],
+        [
+          114.17286,
+          22.277584
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "CAB",
+      "to": "TIH",
+      "coordinates": [
+        [
+          114.183316,
+          22.280005
+        ],
+        [
+          114.191816,
+          22.282446
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "CAB",
+      "to": "WAC",
+      "coordinates": [
+        [
+          114.183316,
+          22.280005
+        ],
+        [
+          114.17286,
+          22.277584
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "CEN",
+      "to": "SHW",
+      "coordinates": [
+        [
+          114.158883,
+          22.281709
+        ],
+        [
+          114.152623,
+          22.286795
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "CHW",
+      "to": "HFC",
+      "coordinates": [
+        [
+          114.237044,
+          22.264453
+        ],
+        [
+          114.23972,
+          22.276673
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "FOH",
+      "to": "NOP",
+      "coordinates": [
+        [
+          114.193315,
+          22.287563
+        ],
+        [
+          114.200753,
+          22.290909
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "FOH",
+      "to": "TIH",
+      "coordinates": [
+        [
+          114.193315,
+          22.287563
+        ],
+        [
+          114.191816,
+          22.282446
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "HFC",
+      "to": "SKW",
+      "coordinates": [
+        [
+          114.23972,
+          22.276673
+        ],
+        [
+          114.228898,
+          22.279154
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "HKU",
+      "to": "KET",
+      "coordinates": [
+        [
+          114.135507,
+          22.283976
+        ],
+        [
+          114.128622,
+          22.281331
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "HKU",
+      "to": "SYP",
+      "coordinates": [
+        [
+          114.135507,
+          22.283976
+        ],
+        [
+          114.142642,
+          22.285435
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "NOP",
+      "to": "QUB",
+      "coordinates": [
+        [
+          114.200753,
+          22.290909
+        ],
+        [
+          114.208992,
+          22.288165
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "QUB",
+      "to": "TAK",
+      "coordinates": [
+        [
+          114.208992,
+          22.288165
+        ],
+        [
+          114.216322,
+          22.284637
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "SHW",
+      "to": "SYP",
+      "coordinates": [
+        [
+          114.152623,
+          22.286795
+        ],
+        [
+          114.142642,
+          22.285435
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "SKW",
+      "to": "SWH",
+      "coordinates": [
+        [
+          114.228898,
+          22.279154
+        ],
+        [
+          114.222289,
+          22.28163
+        ]
+      ]
+    },
+    {
+      "line": "ISL",
+      "from": "SWH",
+      "to": "TAK",
+      "coordinates": [
+        [
+          114.222289,
+          22.28163
+        ],
+        [
+          114.216322,
+          22.284637
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "CHH",
+      "to": "DIH",
+      "coordinates": [
+        [
+          114.209282,
+          22.334477
+        ],
+        [
+          114.201366,
+          22.339779
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "CHH",
+      "to": "KOB",
+      "coordinates": [
+        [
+          114.209282,
+          22.334477
+        ],
+        [
+          114.214053,
+          22.323422
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "DIH",
+      "to": "WTS",
+      "coordinates": [
+        [
+          114.201366,
+          22.339779
+        ],
+        [
+          114.19379,
+          22.34159
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "HOM",
+      "to": "WHA",
+      "coordinates": [
+        [
+          114.182576,
+          22.3094
+        ],
+        [
+          114.189509,
+          22.304951
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "HOM",
+      "to": "YMT",
+      "coordinates": [
+        [
+          114.182576,
+          22.3094
+        ],
+        [
+          114.170546,
+          22.313012
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "KOB",
+      "to": "NTK",
+      "coordinates": [
+        [
+          114.214053,
+          22.323422
+        ],
+        [
+          114.219071,
+          22.315516
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "KOT",
+      "to": "LOF",
+      "coordinates": [
+        [
+          114.176875,
+          22.33682
+        ],
+        [
+          114.187233,
+          22.338023
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "KOT",
+      "to": "SKM",
+      "coordinates": [
+        [
+          114.176875,
+          22.33682
+        ],
+        [
+          114.168872,
+          22.331892
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "KWT",
+      "to": "LAT",
+      "coordinates": [
+        [
+          114.226455,
+          22.312147
+        ],
+        [
+          114.232946,
+          22.307301
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "KWT",
+      "to": "NTK",
+      "coordinates": [
+        [
+          114.226455,
+          22.312147
+        ],
+        [
+          114.219071,
+          22.315516
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "LAT",
+      "to": "YAT",
+      "coordinates": [
+        [
+          114.232946,
+          22.307301
+        ],
+        [
+          114.237159,
+          22.297788
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "LOF",
+      "to": "WTS",
+      "coordinates": [
+        [
+          114.187233,
+          22.338023
+        ],
+        [
+          114.19379,
+          22.34159
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "MOK",
+      "to": "PRE",
+      "coordinates": [
+        [
+          114.169326,
+          22.319549
+        ],
+        [
+          114.168302,
+          22.324455
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "MOK",
+      "to": "YMT",
+      "coordinates": [
+        [
+          114.169326,
+          22.319549
+        ],
+        [
+          114.170546,
+          22.313012
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "PRE",
+      "to": "SKM",
+      "coordinates": [
+        [
+          114.168302,
+          22.324455
+        ],
+        [
+          114.168872,
+          22.331892
+        ]
+      ]
+    },
+    {
+      "line": "KTL",
+      "from": "TIK",
+      "to": "YAT",
+      "coordinates": [
+        [
+          114.25237,
+          22.304075
+        ],
+        [
+          114.237159,
+          22.297788
+        ]
+      ]
+    },
+    {
+      "line": "SIL",
+      "from": "ADM",
+      "to": "OCP",
+      "coordinates": [
+        [
+          114.165064,
+          22.279017
+        ],
+        [
+          114.174286,
+          22.248547
+        ]
+      ]
+    },
+    {
+      "line": "SIL",
+      "from": "LET",
+      "to": "SOH",
+      "coordinates": [
+        [
+          114.155912,
+          22.241958
+        ],
+        [
+          114.148693,
+          22.242944
+        ]
+      ]
+    },
+    {
+      "line": "SIL",
+      "from": "LET",
+      "to": "WCH",
+      "coordinates": [
+        [
+          114.155912,
+          22.241958
+        ],
+        [
+          114.167512,
+          22.247864
+        ]
+      ]
+    },
+    {
+      "line": "SIL",
+      "from": "OCP",
+      "to": "WCH",
+      "coordinates": [
+        [
+          114.174286,
+          22.248547
+        ],
+        [
+          114.167512,
+          22.247864
+        ]
+      ]
+    },
+    {
+      "line": "TCL",
+      "from": "HOK",
+      "to": "KOW",
+      "coordinates": [
+        [
+          114.158159,
+          22.284607
+        ],
+        [
+          114.1616,
+          22.304925
+        ]
+      ]
+    },
+    {
+      "line": "TCL",
+      "from": "KOW",
+      "to": "OLY",
+      "coordinates": [
+        [
+          114.1616,
+          22.304925
+        ],
+        [
+          114.160225,
+          22.317859
+        ]
+      ]
+    },
+    {
+      "line": "TCL",
+      "from": "LAK",
+      "to": "NAC",
+      "coordinates": [
+        [
+          114.126019,
+          22.348449
+        ],
+        [
+          114.153489,
+          22.326289
+        ]
+      ]
+    },
+    {
+      "line": "TCL",
+      "from": "LAK",
+      "to": "TSY",
+      "coordinates": [
+        [
+          114.126019,
+          22.348449
+        ],
+        [
+          114.106753,
+          22.358497
+        ]
+      ]
+    },
+    {
+      "line": "TCL",
+      "from": "NAC",
+      "to": "OLY",
+      "coordinates": [
+        [
+          114.153489,
+          22.326289
+        ],
+        [
+          114.160225,
+          22.317859
+        ]
+      ]
+    },
+    {
+      "line": "TCL",
+      "from": "SUN",
+      "to": "TSY",
+      "coordinates": [
+        [
+          114.028915,
+          22.331984
+        ],
+        [
+          114.106753,
+          22.358497
+        ]
+      ]
+    },
+    {
+      "line": "TCL",
+      "from": "SUN",
+      "to": "TUC",
+      "coordinates": [
+        [
+          114.028915,
+          22.331984
+        ],
+        [
+          113.941374,
+          22.289245
+        ]
+      ]
+    },
+    {
+      "line": "TKL",
+      "from": "HAH",
+      "to": "POA",
+      "coordinates": [
+        [
+          114.264678,
+          22.314587
+        ],
+        [
+          114.257876,
+          22.322377
+        ]
+      ]
+    },
+    {
+      "line": "TKL",
+      "from": "HAH",
+      "to": "TKO",
+      "coordinates": [
+        [
+          114.264678,
+          22.314587
+        ],
+        [
+          114.259858,
+          22.307356
+        ]
+      ]
+    },
+    {
+      "line": "TKL",
+      "from": "LHP",
+      "to": "TKO",
+      "coordinates": [
+        [
+          114.268752,
+          22.295559
+        ],
+        [
+          114.259858,
+          22.307356
+        ]
+      ]
+    },
+    {
+      "line": "TKL",
+      "from": "NOP",
+      "to": "QUB",
+      "coordinates": [
+        [
+          114.200753,
+          22.290909
+        ],
+        [
+          114.208992,
+          22.288165
+        ]
+      ]
+    },
+    {
+      "line": "TKL",
+      "from": "QUB",
+      "to": "YAT",
+      "coordinates": [
+        [
+          114.208992,
+          22.288165
+        ],
+        [
+          114.237159,
+          22.297788
+        ]
+      ]
+    },
+    {
+      "line": "TKL",
+      "from": "TIK",
+      "to": "TKO",
+      "coordinates": [
+        [
+          114.25237,
+          22.304075
+        ],
+        [
+          114.259858,
+          22.307356
+        ]
+      ]
+    },
+    {
+      "line": "TKL",
+      "from": "TIK",
+      "to": "YAT",
+      "coordinates": [
+        [
+          114.25237,
+          22.304075
+        ],
+        [
+          114.237159,
+          22.297788
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "AUS",
+      "to": "ETS",
+      "coordinates": [
+        [
+          114.166601,
+          22.304236
+        ],
+        [
+          114.175072,
+          22.295561
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "AUS",
+      "to": "NAC",
+      "coordinates": [
+        [
+          114.166601,
+          22.304236
+        ],
+        [
+          114.153489,
+          22.326289
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "CIO",
+      "to": "SHM",
+      "coordinates": [
+        [
+          114.20342,
+          22.382779
+        ],
+        [
+          114.208065,
+          22.387407
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "CIO",
+      "to": "STW",
+      "coordinates": [
+        [
+          114.20342,
+          22.382779
+        ],
+        [
+          114.194759,
+          22.376876
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "CKT",
+      "to": "STW",
+      "coordinates": [
+        [
+          114.186294,
+          22.374732
+        ],
+        [
+          114.194759,
+          22.376876
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "CKT",
+      "to": "TAW",
+      "coordinates": [
+        [
+          114.186294,
+          22.374732
+        ],
+        [
+          114.17852,
+          22.373025
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "DIH",
+      "to": "HIK",
+      "coordinates": [
+        [
+          114.201366,
+          22.339779
+        ],
+        [
+          114.170879,
+          22.364059
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "DIH",
+      "to": "KAT",
+      "coordinates": [
+        [
+          114.201366,
+          22.339779
+        ],
+        [
+          114.199612,
+          22.330888
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "ETS",
+      "to": "HUH",
+      "coordinates": [
+        [
+          114.175072,
+          22.295561
+        ],
+        [
+          114.182248,
+          22.302901
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "HEO",
+      "to": "MOS",
+      "coordinates": [
+        [
+          114.225728,
+          22.417475
+        ],
+        [
+          114.23118,
+          22.424676
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "HEO",
+      "to": "TSH",
+      "coordinates": [
+        [
+          114.225728,
+          22.417475
+        ],
+        [
+          114.222637,
+          22.408306
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "HIK",
+      "to": "TAW",
+      "coordinates": [
+        [
+          114.170879,
+          22.364059
+        ],
+        [
+          114.17852,
+          22.373025
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "HOM",
+      "to": "HUH",
+      "coordinates": [
+        [
+          114.182576,
+          22.3094
+        ],
+        [
+          114.182248,
+          22.302901
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "HOM",
+      "to": "TKW",
+      "coordinates": [
+        [
+          114.182576,
+          22.3094
+        ],
+        [
+          114.187615,
+          22.31694
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "KAT",
+      "to": "SUW",
+      "coordinates": [
+        [
+          114.199612,
+          22.330888
+        ],
+        [
+          114.191038,
+          22.325806
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "KSR",
+      "to": "TWW",
+      "coordinates": [
+        [
+          114.06333,
+          22.434861
+        ],
+        [
+          114.110074,
+          22.368148
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "KSR",
+      "to": "YUL",
+      "coordinates": [
+        [
+          114.06333,
+          22.434861
+        ],
+        [
+          114.03491,
+          22.446191
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "LOP",
+      "to": "TIS",
+      "coordinates": [
+        [
+          114.025348,
+          22.447666
+        ],
+        [
+          114.004409,
+          22.44787
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "LOP",
+      "to": "YUL",
+      "coordinates": [
+        [
+          114.025348,
+          22.447666
+        ],
+        [
+          114.03491,
+          22.446191
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "MEF",
+      "to": "NAC",
+      "coordinates": [
+        [
+          114.137868,
+          22.338409
+        ],
+        [
+          114.153489,
+          22.326289
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "MEF",
+      "to": "TWW",
+      "coordinates": [
+        [
+          114.137868,
+          22.338409
+        ],
+        [
+          114.110074,
+          22.368148
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "MOS",
+      "to": "WKS",
+      "coordinates": [
+        [
+          114.23118,
+          22.424676
+        ],
+        [
+          114.243777,
+          22.429194
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "SHM",
+      "to": "TSH",
+      "coordinates": [
+        [
+          114.208065,
+          22.387407
+        ],
+        [
+          114.222637,
+          22.408306
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "SIH",
+      "to": "TIS",
+      "coordinates": [
+        [
+          113.978749,
+          22.412012
+        ],
+        [
+          114.004409,
+          22.44787
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "SIH",
+      "to": "TUM",
+      "coordinates": [
+        [
+          113.978749,
+          22.412012
+        ],
+        [
+          113.973085,
+          22.394589
+        ]
+      ]
+    },
+    {
+      "line": "TML",
+      "from": "SUW",
+      "to": "TKW",
+      "coordinates": [
+        [
+          114.191038,
+          22.325806
+        ],
+        [
+          114.187615,
+          22.31694
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "ADM",
+      "to": "CEN",
+      "coordinates": [
+        [
+          114.165064,
+          22.279017
+        ],
+        [
+          114.158883,
+          22.281709
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "ADM",
+      "to": "TST",
+      "coordinates": [
+        [
+          114.165064,
+          22.279017
+        ],
+        [
+          114.172317,
+          22.297618
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "CSW",
+      "to": "LCK",
+      "coordinates": [
+        [
+          114.15616,
+          22.335507
+        ],
+        [
+          114.148414,
+          22.337396
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "CSW",
+      "to": "SSP",
+      "coordinates": [
+        [
+          114.15616,
+          22.335507
+        ],
+        [
+          114.162374,
+          22.330697
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "JOR",
+      "to": "TST",
+      "coordinates": [
+        [
+          114.171672,
+          22.304947
+        ],
+        [
+          114.172317,
+          22.297618
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "JOR",
+      "to": "YMT",
+      "coordinates": [
+        [
+          114.171672,
+          22.304947
+        ],
+        [
+          114.170546,
+          22.313012
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "KWF",
+      "to": "KWH",
+      "coordinates": [
+        [
+          114.127749,
+          22.356802
+        ],
+        [
+          114.131194,
+          22.363211
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "KWF",
+      "to": "LAK",
+      "coordinates": [
+        [
+          114.127749,
+          22.356802
+        ],
+        [
+          114.126019,
+          22.348449
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "KWH",
+      "to": "TWH",
+      "coordinates": [
+        [
+          114.131194,
+          22.363211
+        ],
+        [
+          114.125071,
+          22.370804
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "LAK",
+      "to": "MEF",
+      "coordinates": [
+        [
+          114.126019,
+          22.348449
+        ],
+        [
+          114.137868,
+          22.338409
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "LCK",
+      "to": "MEF",
+      "coordinates": [
+        [
+          114.148414,
+          22.337396
+        ],
+        [
+          114.137868,
+          22.338409
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "MOK",
+      "to": "PRE",
+      "coordinates": [
+        [
+          114.169326,
+          22.319549
+        ],
+        [
+          114.168302,
+          22.324455
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "MOK",
+      "to": "YMT",
+      "coordinates": [
+        [
+          114.169326,
+          22.319549
+        ],
+        [
+          114.170546,
+          22.313012
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "PRE",
+      "to": "SSP",
+      "coordinates": [
+        [
+          114.168302,
+          22.324455
+        ],
+        [
+          114.162374,
+          22.330697
+        ]
+      ]
+    },
+    {
+      "line": "TWL",
+      "from": "TSW",
+      "to": "TWH",
+      "coordinates": [
+        [
+          114.117655,
+          22.373713
+        ],
+        [
+          114.125071,
+          22.370804
+        ]
+      ]
+    }
+  ]
+}
