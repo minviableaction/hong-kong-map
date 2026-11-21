@@ -13,6 +13,8 @@ const IMAGE_FRESH_MS = 90_000
 const IMAGE_REFRESH_MIN_MS = 30_000
 const UPSTREAM_CONCURRENCY = 2
 const UPSTREAM_GAP_MS = 40
+const WORKER_CHUNK = 40
+const STORE_URL = 'https://hk-map.internal/schedule-store'
 const RATE_LIMIT_COOLDOWN_MS = 120_000
 const IMAGE_CACHE_LIMIT = 80
 const CAMERA_KEY = /^[A-Za-z0-9]{2,16}$/
@@ -21,10 +23,13 @@ const SHARED_CACHE = 'public, max-age=20, s-maxage=45, stale-while-revalidate=12
 
 type RawTrain = { dest?: string; time?: string; plat?: string; route?: string; valid?: string }
 
-let schedule: TrainSnapshot | null = null
+type ScheduleStore = TrainSnapshot & { cursor: number }
+
+let schedule: ScheduleStore | null = null
 let scheduleRefresh: Promise<void> | null = null
 let scheduleBlockedUntil = 0
 let scheduleUpstreamFetches = 0
+let lastChunkAt = 0
 
 let cameraList: { fetchedAt: number; cameras: Camera[] } | null = null
 let cameraRefresh: Promise<void> | null = null
@@ -91,10 +96,41 @@ async function fetchStation(line: string, station: string): Promise<CachedStatio
   }
 }
 
+function edgeCache() {
+  const cachesApi = (globalThis as {
+    caches?: { default?: { match(request: string): Promise<Response | undefined>; put(request: string, response: Response): Promise<void> } }
+  }).caches
+  return cachesApi?.default ?? null
+}
+
+async function loadStore() {
+  if (schedule) return schedule
+  const cache = edgeCache()
+  if (!cache) return null
+  const hit = await cache.match(STORE_URL)
+  if (!hit) return null
+  const stored = (await hit.json()) as ScheduleStore
+  schedule = stored
+  return stored
+}
+
+async function saveStore(store: ScheduleStore) {
+  schedule = store
+  const cache = edgeCache()
+  if (!cache) return
+  await cache.put(
+    STORE_URL,
+    new Response(JSON.stringify(store), { headers: { 'content-type': 'application/json' } }),
+  )
+}
+
 async function refreshSchedules() {
-  const previous = schedule?.stations ?? {}
-  const stations: Record<string, CachedStation> = { ...previous }
   const jobs = stationJobs()
+  const onEdge = edgeCache() !== null
+  const chunk = onEdge ? Math.min(WORKER_CHUNK, jobs.length) : jobs.length
+  const store = (await loadStore()) ?? { fetchedAt: 0, cursor: 0, stations: {} }
+  const stations: Record<string, CachedStation> = { ...store.stations }
+  const selected = Array.from({ length: chunk }, (_, offset) => jobs[(store.cursor + offset) % jobs.length])
   let cursor = 0
   let blocked = false
 
@@ -102,8 +138,8 @@ async function refreshSchedules() {
     while (!blocked) {
       const index = cursor
       cursor += 1
-      if (index >= jobs.length) return
-      const job = jobs[index]
+      if (index >= selected.length) return
+      const job = selected[index]
       const result = await fetchStation(job.line, job.station)
       if (result === 'blocked') {
         blocked = true
@@ -114,28 +150,41 @@ async function refreshSchedules() {
     }
   }
 
-  await Promise.all(Array.from({ length: UPSTREAM_CONCURRENCY }, () => worker()))
-  schedule = { fetchedAt: Date.now(), stations }
+  await Promise.all(Array.from({ length: Math.min(UPSTREAM_CONCURRENCY, selected.length) }, () => worker()))
+  const nextCursor = (store.cursor + selected.length) % jobs.length
+  const completedCycle = !onEdge || nextCursor === 0
+  const next: ScheduleStore = {
+    fetchedAt: completedCycle ? Date.now() : store.fetchedAt,
+    cursor: nextCursor,
+    stations,
+  }
+  if (next.fetchedAt === 0 && Object.keys(stations).length > 0) next.fetchedAt = Date.now()
+  await saveStore(next)
 }
 
 function startScheduleRefresh() {
-  if (!scheduleRefresh) {
-    scheduleRefresh = refreshSchedules().finally(() => {
-      scheduleRefresh = null
-    })
-  }
+  if (scheduleRefresh) return scheduleRefresh
+  if (schedule && Date.now() - lastChunkAt < 55_000) return Promise.resolve()
+  scheduleRefresh = refreshSchedules().finally(() => {
+    scheduleRefresh = null
+    lastChunkAt = Date.now()
+  })
   return scheduleRefresh
 }
 
 export async function trainsResponse() {
+  if (!schedule) await loadStore()
+  const missing = !schedule || Object.keys(schedule.stations).length === 0
   let age = schedule ? Date.now() - schedule.fetchedAt : Number.POSITIVE_INFINITY
-  if (age >= SCHEDULE_FRESH_MS && Date.now() >= scheduleBlockedUntil) {
+  if ((missing || age >= SCHEDULE_FRESH_MS) && Date.now() >= scheduleBlockedUntil) {
     const pending = startScheduleRefresh()
-    if (!schedule) await pending
+    if (missing) await pending
   }
   age = schedule ? Date.now() - schedule.fetchedAt : Number.POSITIVE_INFINITY
   const hit = !schedule ? 'MISS' : age < SCHEDULE_FRESH_MS ? 'HIT' : 'STALE'
-  const body: TrainSnapshot = schedule ?? { fetchedAt: 0, stations: {} }
+  const body: TrainSnapshot = schedule
+    ? { fetchedAt: schedule.fetchedAt, stations: schedule.stations }
+    : { fetchedAt: 0, stations: {} }
   return Response.json(body, { headers: cacheHeaders(hit) })
 }
 
