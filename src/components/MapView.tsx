@@ -2,6 +2,7 @@ import { cameraFeatures, type Camera } from '@/lib/cameras'
 import { trainFeatures, type TrainRun } from '@/lib/trains'
 import {
   lineFeatures,
+  lines,
   stationBounds,
   stationByCode,
   stationFeatures,
@@ -10,6 +11,31 @@ import { Map, NavigationControl, type GeoJSONSource, type MapMouseEvent } from '
 import { useEffect, useRef, useState } from 'react'
 
 const STYLE = 'https://tiles.openfreemap.org/styles/liberty'
+
+function trainMarker(color: string) {
+  const size = 64
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const context = canvas.getContext('2d')
+  if (!context) return null
+  context.beginPath()
+  context.arc(32, 32, 22, 0, Math.PI * 2)
+  context.fillStyle = '#ffffff'
+  context.fill()
+  context.lineWidth = 8
+  context.strokeStyle = color
+  context.stroke()
+  context.beginPath()
+  context.arc(32, 32, 8, 0, Math.PI * 2)
+  context.fillStyle = color
+  context.fill()
+  return context.getImageData(0, 0, size, size)
+}
+
+function trainImageId(color: string) {
+  return `train-${color.slice(1)}`
+}
 
 function browserCanDrawMap() {
   if (typeof document === 'undefined') return true
@@ -228,35 +254,34 @@ export function MapView({
         },
       })
 
+      for (const line of lines) {
+        const image = trainMarker(line.color)
+        const imageId = trainImageId(line.color)
+        if (image && !map.hasImage(imageId)) map.addImage(imageId, image, { pixelRatio: 2 })
+      }
       map.addSource('trains', { type: 'geojson', data: trainFeatures(runsRef.current, Date.now()) })
       map.addLayer({
         id: 'trains',
-        type: 'circle',
-        source: 'trains',
-        paint: {
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 6, 12, 8, 16, 11],
-          'circle-color': ['get', 'color'],
-          'circle-stroke-color': '#ffffff',
-          'circle-stroke-width': 2,
-        },
-      })
-      map.addLayer({
-        id: 'train-labels',
         type: 'symbol',
         source: 'trains',
-        minzoom: 13,
         layout: {
+          'icon-image': ['concat', 'train-', ['slice', ['get', 'color'], 1]],
+          'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 0.42, 13, 0.58, 16, 0.82],
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true,
+          'icon-pitch-alignment': 'viewport',
           'text-field': ['get', 'label'],
           'text-font': ['Noto Sans Regular'],
-          'text-size': 11,
-          'text-offset': [0, 1.1],
+          'text-size': 12,
+          'text-offset': [0, 1.25],
           'text-anchor': 'top',
+          'text-optional': true,
           'text-allow-overlap': false,
         },
         paint: {
           'text-color': '#1c1917',
           'text-halo-color': '#ffffff',
-          'text-halo-width': 1.2,
+          'text-halo-width': 1.4,
         },
       })
 
@@ -271,7 +296,7 @@ export function MapView({
       }
       const networkVisibility = visibilityRef.current.showNetwork ? 'visible' : 'none'
       const cameraVisibility = visibilityRef.current.showCameras ? 'visible' : 'none'
-      for (const layer of ['mtr-lines', 'mtr-lines-casing', 'stations', 'station-labels', 'station-focus', 'trains', 'train-labels']) {
+      for (const layer of ['mtr-lines', 'mtr-lines-casing', 'stations', 'station-labels', 'station-focus', 'trains']) {
         map.setLayoutProperty(layer, 'visibility', networkVisibility)
       }
       for (const layer of ['cameras', 'cameras-cluster', 'cameras-count']) {
@@ -341,7 +366,7 @@ export function MapView({
     if (!map?.getLayer('mtr-lines')) return
     const networkVisibility = showNetwork ? 'visible' : 'none'
     const cameraVisibility = showCameras ? 'visible' : 'none'
-    for (const layer of ['mtr-lines', 'mtr-lines-casing', 'stations', 'station-labels', 'station-focus', 'trains', 'train-labels']) {
+    for (const layer of ['mtr-lines', 'mtr-lines-casing', 'stations', 'station-labels', 'station-focus', 'trains']) {
       map.setLayoutProperty(layer, 'visibility', networkVisibility)
     }
     for (const layer of ['cameras', 'cameras-cluster', 'cameras-count']) {
