@@ -6,9 +6,19 @@ import {
   stationFeatures,
 } from '@/lib/network'
 import { Map, NavigationControl, type GeoJSONSource, type MapMouseEvent } from 'maplibre-gl'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const STYLE = 'https://tiles.openfreemap.org/styles/liberty'
+
+function browserCanDrawMap() {
+  if (typeof document === 'undefined') return true
+  try {
+    const canvas = document.createElement('canvas')
+    return Boolean(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
+  } catch {
+    return false
+  }
+}
 
 function stationFocusData(code: string | null) {
   const station = code ? stationByCode[code] : undefined
@@ -54,6 +64,8 @@ export function MapView({
   const selectedStationRef = useRef(selectedStation)
   const visibilityRef = useRef({ showNetwork, showCameras })
   const handlersRef = useRef({ onSelectStation, onSelectCamera })
+  const [canDraw] = useState(browserCanDrawMap)
+  const [failed, setFailed] = useState(false)
 
   useEffect(() => {
     camerasRef.current = cameras
@@ -64,19 +76,27 @@ export function MapView({
 
   useEffect(() => {
     const container = containerRef.current
-    if (!container) return
+    if (!container || !canDraw) return
 
-    const map = new Map({
-      container,
-      style: STYLE,
-      bounds: stationBounds(),
-      fitBoundsOptions: { padding: 48 },
-      maxBounds: [
-        [113.55, 22.05],
-        [114.62, 22.68],
-      ],
-      attributionControl: { compact: false },
-    })
+    let map: Map
+    try {
+      map = new Map({
+        container,
+        style: STYLE,
+        bounds: stationBounds(),
+        fitBoundsOptions: { padding: 48 },
+        maxBounds: [
+          [113.55, 22.05],
+          [114.62, 22.68],
+        ],
+        failIfMajorPerformanceCaveat: false,
+        attributionControl: { compact: false },
+      })
+    } catch (error) {
+      console.error(error)
+      queueMicrotask(() => setFailed(true))
+      return
+    }
     map.addControl(new NavigationControl({ showCompass: false }), 'top-right')
     mapRef.current = map
 
@@ -247,7 +267,7 @@ export function MapView({
       map.remove()
       mapRef.current = null
     }
-  }, [])
+  }, [canDraw])
 
   useEffect(() => {
     const map = mapRef.current
@@ -299,5 +319,14 @@ export function MapView({
     mapRef.current?.fitBounds(stationBounds(), { padding: 56, duration: 700 })
   }, [fitToken])
 
-  return <div ref={containerRef} className="absolute inset-0 h-full w-full" />
+  return (
+    <>
+      <div ref={containerRef} className="absolute inset-0 h-full w-full" />
+      {!canDraw || failed ? (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-stone-100 px-6 text-center text-sm leading-6 text-stone-800">
+          這個瀏覽器沒有可用的地圖繪圖功能。請在 Chrome 開啟「設定 → 系統 → 使用圖形加速功能」，然後重新載入。
+        </div>
+      ) : null}
+    </>
+  )
 }
