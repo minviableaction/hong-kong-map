@@ -287,7 +287,7 @@ export function MapView({
         source: 'trains',
         layout: {
           'icon-image': ['concat', 'train-', ['slice', ['get', 'color'], 1]],
-          'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 0.62, 13, 0.78, 16, 1],
+          'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 0.78, 13, 0.92, 16, 1.05],
           'icon-allow-overlap': true,
           'icon-ignore-placement': true,
           'icon-pitch-alignment': 'viewport',

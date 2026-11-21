@@ -128,8 +128,16 @@ function choosePlacement(sighting: Sighting, sightings: Sighting[]) {
   return best
 }
 
+function preferUpcoming(current: TrainRun | undefined, run: TrainRun) {
+  if (!current) return true
+  const now = Date.now() - 20_000
+  const runComing = run.eta >= now
+  const currentComing = current.eta >= now
+  if (runComing !== currentComing) return runComing
+  return run.eta < current.eta
+}
+
 function runsFromSightings(sightings: Sighting[]) {
-  const runs: TrainRun[] = []
   const waiting = new Map<string, TrainRun>()
   const approaching = new Map<string, TrainRun>()
   for (const sighting of sightings) {
@@ -152,16 +160,13 @@ function runsFromSightings(sightings: Sighting[]) {
     }
     if (run.kind !== 'approach') {
       const key = `${run.line}:${run.station}`
-      const current = waiting.get(key)
-      if (!current || run.eta < current.eta) waiting.set(key, run)
+      if (preferUpcoming(waiting.get(key), run)) waiting.set(key, run)
       continue
     }
     const hop = `${run.line}:${placement.from}:${placement.to}`
-    const current = approaching.get(hop)
-    if (!current || run.eta < current.eta) approaching.set(hop, run)
+    if (preferUpcoming(approaching.get(hop), run)) approaching.set(hop, run)
   }
-  runs.push(...approaching.values(), ...waiting.values())
-  return runs
+  return [...approaching.values(), ...waiting.values()]
 }
 
 export function runsFromSnapshot(snapshot: TrainSnapshot) {
@@ -253,27 +258,10 @@ function pointAlong(run: TrainRun, fraction: number): [number, number] {
   return run.path[run.path.length - 1] ?? run.path[0]
 }
 
-function stillRunning(run: TrainRun, now: number) {
-  const remain = run.eta - now
-  return remain <= 40 * 60 * 1000 && remain >= -20_000
-}
-
-function runsInView(runs: TrainRun[], now: number, zoom: number) {
-  if (zoom >= 13) return runs
-  const next = new Map<string, TrainRun>()
-  for (const run of runs) {
-    if (run.kind !== 'approach' || !stillRunning(run, now)) continue
-    const key = `${run.line}:${run.label}`
-    const current = next.get(key)
-    if (!current || run.eta < current.eta) next.set(key, run)
-  }
-  return [...next.values()]
-}
-
 export function trainFeatures(runs: TrainRun[], now: number, zoom = 11) {
   return {
     type: 'FeatureCollection' as const,
-    features: runsInView(runs, now, zoom).flatMap((run) => {
+    features: runs.flatMap((run) => {
       const coordinate = trainCoordinate(run, now, zoom)
       if (!coordinate) return []
       return [{
