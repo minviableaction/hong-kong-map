@@ -37,10 +37,10 @@ function trainMarker(color: string) {
   const context = canvas.getContext('2d')
   if (!context) return null
   context.clearRect(0, 0, size, size)
-  roundedRect(context, 4, 12, 56, 34, 12)
+  roundedRect(context, 2, 8, 60, 42, 14)
   context.fillStyle = '#ffffff'
   context.fill()
-  roundedRect(context, 8, 16, 48, 26, 9)
+  roundedRect(context, 8, 14, 48, 28, 10)
   context.fillStyle = color
   context.fill()
   context.fillStyle = '#ffffff'
@@ -280,24 +280,43 @@ export function MapView({
         const imageId = trainImageId(line.color)
         if (image && !map.hasImage(imageId)) map.addImage(imageId, image, { pixelRatio: 2 })
       }
-      map.addSource('trains', { type: 'geojson', data: trainFeatures(runsRef.current, Date.now()) })
+      map.addSource('trains', { type: 'geojson', data: trainFeatures(runsRef.current, Date.now(), map.getZoom()) })
+      map.addLayer({
+        id: 'trains-dot',
+        type: 'circle',
+        source: 'trains',
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 9, 13, 11, 16, 13],
+          'circle-color': ['get', 'color'],
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 3,
+        },
+      })
       map.addLayer({
         id: 'trains',
         type: 'symbol',
         source: 'trains',
         layout: {
           'icon-image': ['concat', 'train-', ['slice', ['get', 'color'], 1]],
-          'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 0.7, 13, 0.95, 16, 1.25],
+          'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 1.15, 13, 1, 16, 1.15],
           'icon-allow-overlap': true,
           'icon-ignore-placement': true,
           'icon-pitch-alignment': 'viewport',
+        },
+      })
+      map.addLayer({
+        id: 'train-labels',
+        type: 'symbol',
+        source: 'trains',
+        minzoom: 13,
+        layout: {
           'text-field': ['get', 'label'],
           'text-font': ['Noto Sans Regular'],
           'text-size': 12,
-          'text-offset': [0, 1.25],
+          'text-offset': [0, 1.45],
           'text-anchor': 'top',
-          'text-optional': true,
           'text-allow-overlap': false,
+          'text-optional': true,
         },
         paint: {
           'text-color': '#1c1917',
@@ -306,7 +325,7 @@ export function MapView({
         },
       })
 
-      const interactive = ['trains', 'stations', 'cameras', 'cameras-cluster']
+      const interactive = ['trains', 'trains-dot', 'stations', 'cameras', 'cameras-cluster']
       for (const layer of interactive) {
         map.on('mouseenter', layer, () => {
           map.getCanvas().style.cursor = 'pointer'
@@ -317,7 +336,7 @@ export function MapView({
       }
       const networkVisibility = visibilityRef.current.showNetwork ? 'visible' : 'none'
       const cameraVisibility = visibilityRef.current.showCameras ? 'visible' : 'none'
-      for (const layer of ['mtr-lines', 'mtr-lines-casing', 'stations', 'station-labels', 'station-focus', 'trains']) {
+      for (const layer of ['mtr-lines', 'mtr-lines-casing', 'stations', 'station-labels', 'station-focus', 'trains-dot', 'trains', 'train-labels']) {
         map.setLayoutProperty(layer, 'visibility', networkVisibility)
       }
       for (const layer of ['cameras', 'cameras-cluster', 'cameras-count']) {
@@ -342,7 +361,7 @@ export function MapView({
           })
           return
         }
-        if (layerId === 'trains' && typeof feature.properties?.station === 'string') {
+        if ((layerId === 'trains' || layerId === 'trains-dot') && typeof feature.properties?.station === 'string') {
           handlersRef.current.onSelectStation(feature.properties.station)
         }
         if (layerId === 'stations' && typeof feature.properties?.code === 'string') {
@@ -361,7 +380,7 @@ export function MapView({
           lastDrawn = time
           const source = map.getSource('trains')
           if (source && 'setData' in source) {
-            ;(source as GeoJSONSource).setData(trainFeatures(runsRef.current, Date.now()))
+            ;(source as GeoJSONSource).setData(trainFeatures(runsRef.current, Date.now(), map.getZoom()))
           }
         }
         frame = window.requestAnimationFrame(moveTrains)
@@ -387,7 +406,7 @@ export function MapView({
     if (!map?.getLayer('mtr-lines')) return
     const networkVisibility = showNetwork ? 'visible' : 'none'
     const cameraVisibility = showCameras ? 'visible' : 'none'
-    for (const layer of ['mtr-lines', 'mtr-lines-casing', 'stations', 'station-labels', 'station-focus', 'trains']) {
+    for (const layer of ['mtr-lines', 'mtr-lines-casing', 'stations', 'station-labels', 'station-focus', 'trains-dot', 'trains', 'train-labels']) {
       map.setLayoutProperty(layer, 'visibility', networkVisibility)
     }
     for (const layer of ['cameras', 'cameras-cluster', 'cameras-count']) {

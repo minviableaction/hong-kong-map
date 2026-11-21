@@ -189,7 +189,32 @@ export async function fetchTrainSnapshot(signal: AbortSignal) {
   return (await response.json()) as TrainSnapshot
 }
 
-export function trainCoordinate(run: TrainRun, now: number): [number, number] | null {
+function phaseOf(id: string) {
+  let hash = 0
+  for (let index = 0; index < id.length; index += 1) {
+    hash = (hash * 33 + id.charCodeAt(index)) >>> 0
+  }
+  return (hash % 1000) / 1000
+}
+
+function metersPerPixel(zoom: number, latitude: number) {
+  return (156543.03392 * Math.cos((latitude * Math.PI) / 180)) / 2 ** zoom
+}
+
+// At city zoom a real train crawls by a fraction of a pixel. Keep the hop from the timetable,
+// but move fast enough to see until the map is close enough for the real speed.
+function fractionAlong(run: TrainRun, now: number, zoom: number, timetableFraction: number) {
+  const distance = run.cumulative[run.cumulative.length - 1] ?? 0
+  if (distance < 1) return timetableFraction
+  const latitude = run.path[0]?.[1] ?? 22.3
+  const realSpeed = distance / (run.runMs / 1000)
+  const visibleSpeed = 3 * metersPerPixel(zoom, latitude)
+  if (realSpeed >= visibleSpeed) return timetableFraction
+  const period = (distance / visibleSpeed) * 1000
+  return ((now % period) / period + phaseOf(run.id)) % 1
+}
+
+export function trainCoordinate(run: TrainRun, now: number, zoom = 11): [number, number] | null {
   const remain = run.eta - now
   if (run.kind === 'wait') {
     if (remain < 0 || remain > 3 * 60 * 1000) return null
@@ -198,11 +223,11 @@ export function trainCoordinate(run: TrainRun, now: number): [number, number] | 
   if (run.kind === 'depart') {
     if (remain > 3 * 60 * 1000 || remain < -run.runMs) return null
     if (remain > 0) return run.path[0]
-    return pointAlong(run, Math.min(1, -remain / run.runMs))
+    return pointAlong(run, fractionAlong(run, now, zoom, Math.min(1, -remain / run.runMs)))
   }
   if (remain > run.runMs || remain < -20_000) return null
-  const fraction = Math.min(1, Math.max(0, 1 - remain / run.runMs))
-  return pointAlong(run, fraction)
+  const timetableFraction = Math.min(1, Math.max(0, 1 - remain / run.runMs))
+  return pointAlong(run, fractionAlong(run, now, zoom, timetableFraction))
 }
 
 function pointAlong(run: TrainRun, fraction: number): [number, number] {
@@ -225,11 +250,11 @@ function pointAlong(run: TrainRun, fraction: number): [number, number] {
   return run.path[run.path.length - 1] ?? run.path[0]
 }
 
-export function trainFeatures(runs: TrainRun[], now: number) {
+export function trainFeatures(runs: TrainRun[], now: number, zoom = 11) {
   return {
     type: 'FeatureCollection' as const,
     features: runs.flatMap((run) => {
-      const coordinate = trainCoordinate(run, now)
+      const coordinate = trainCoordinate(run, now, zoom)
       if (!coordinate) return []
       return [{
         type: 'Feature' as const,
